@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const CompleteProfile = () => {
   const navigate = useNavigate();
 
-  // 🔮 Future Redux/API ready state
+  // 🔮 Future /API ready state
   const [formData, setFormData] = useState({
     name: "",
     whatsapp: "",

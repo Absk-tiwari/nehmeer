@@ -25,9 +25,6 @@ const CompleteProfile = ({ mode = "create" }) => {
     } else {
       console.log("Updating Profile", formData);
     }
-
-    // Future API
-    // fetch("/api/profile", { method:"POST", body: JSON.stringify(formData) })
   };
 
   return (
