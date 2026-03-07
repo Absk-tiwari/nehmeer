@@ -14,7 +14,6 @@ import ProfileProgress from "./dashboard/ProfileProgress";
 import UserReviews from "./dashboard/UserReviews";
 import QuickGuide from "./dashboard/QuickGuide";
 import NavTop from "./layouts/NavTop";
-
 const Dashboard = () => {
    const [notificationCount, setNotificationCount] = useState(0);
   const navigate = useNavigate();
@@ -29,8 +28,7 @@ const services = [
   { name: "Driver", icon: driver, type: "driver" },
 ];
  useEffect(() => {
-    // TEMP (replace with API later)
-    // fetch("/api/notifications/unread-count")
+   
     setNotificationCount(5);
   }, []);
   return (
