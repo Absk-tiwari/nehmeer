@@ -7,6 +7,8 @@ import App from './App';
 import Loader from "./components/layouts/Loader";
 import { SearchProvider } from './contexts/SearchContext';
 import reportWebVitals from './reportWebVitals';
+import "leaflet/dist/leaflet.css";
+import "./utils/fixLeafletIcon";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
