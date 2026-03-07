@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import banner1 from "../assets/img/banner-head.svg";
 import banner2 from "../assets/img/banner-middle.svg";
-import logo from "../assets/img/logo.png";
 import chef from "../assets/img/chef.svg";
 import dog from "../assets/img/dog.svg";
 import driver from "../assets/img/driver.svg";
