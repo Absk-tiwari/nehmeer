@@ -25,18 +25,21 @@ import PrivacyPolicy from "../components/profile/PrivacyPolicy.jsx";
 import License from "../components/profile/License.jsx";
 import Favourites from "../components/profile/Favourites.jsx";
 import SavedLocation from "../components/profile/SavedLocation.jsx";
-// import ServiceList from "../components/services/ServiceList";
-// import ServiceDetails from "../components/services/ServiceDetails";
+import Settings from "../components/profile/Settings.jsx";
+import ChangePassword from "../components/profile/ChangePassword.jsx";
+import HelpSupport from "../components/profile/HelpSupport.jsx";
+import CustomRequirements from "../components/posts/CustomRequirements.jsx";
+import CustomDuties from "../components/pages/CustomDuties.jsx";
+import CustomSubmit from "../components/pages/CustomSubmit.jsx";
 
 const FullLayout = lazy(() => import("../components/layouts/FullLayout.js"));
 
-// const Search = lazy(() => import("../components/search/Search.js"));
 /***** Pages ****/
 const Login = lazy(() => import("../components/auth/Login.js"));
 const Register = lazy(() => import("../components/auth/Register.js"));
 const Dashboard = lazy(() => import("../components/Dashboard.js"));
 
-/***** Routes ******/
+/**** Routes ****/
 
 const ThemeRoutes = [
   {
@@ -75,7 +78,14 @@ const ThemeRoutes = [
       { path: "/license" , element: <License/> },
       { path: "/favourites" , element: <Favourites/> },
      { path: "/saved-location", element: <SavedLocation /> },
-
+     { path: "/settings", element: <Settings/> },
+     { path: "/change-password", element: <ChangePassword/> },
+     { path: "/support", element: <HelpSupport /> },
+     { path: "/custom-requirements", element: <CustomRequirements /> },
+     { path: "/custom-duties", element: <CustomDuties /> },
+     { path: "/custom-requirements", element: <CustomRequirements /> },
+      { path: "/custom-duties", element: <CustomDuties /> },
+      { path: "/custom-submit", element: <CustomSubmit /> },
      
       // 👉 Protected Route only for dashboard
       // {

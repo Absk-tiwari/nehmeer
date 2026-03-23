@@ -1,7 +1,7 @@
 import React from "react";
 import user1 from "../../assets/img/user1.png";
 import { useNavigate } from "react-router-dom";
-const Profile = () => {
+const Profile = (notificationCount) => {
 
  const menuItems = [
 { name:"Favourites", path:"/favourites" },
@@ -25,9 +25,14 @@ const Profile = () => {
       <div className="user-profile-header">
         <h2>My Profile</h2>
 
-        <div className="user-profile-notification">
+        <div
+          className="notification"
+          onClick={() => navigate("/notifications")}
+        >
           🔔
-          <span className="user-profile-notification-badge">2</span>
+          {notificationCount > 0 && (
+            <span className="badge">{notificationCount}</span>
+          )}
         </div>
       </div>
 
