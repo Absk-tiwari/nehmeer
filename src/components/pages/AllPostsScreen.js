@@ -3,6 +3,7 @@ import PostCard from "../posts/PostCard";
 import PostTabs from "../posts/PostTabs";
 import RecommendedWorkerCard from "../../workers/RecommendedWorkerCard";
 import { serviceData } from "../data/serviceData";
+import { useNavigate } from "react-router-dom";
 // import RecommendedWorkerCard from "../workers/RecommendedWorkerCard"; // ✅ fixed path if inside components
 
 const AllPostsScreen = () => {
@@ -10,6 +11,7 @@ const AllPostsScreen = () => {
   const [posts, setPosts] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const Navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -84,7 +86,7 @@ const AllPostsScreen = () => {
       {/* HEADER */}
       <div className="headerRow">
         <h2>All Posts</h2>
-        <button className="addBtn">+</button>
+        <button onClick={()=>Navigate("/create-post")} className="addBtn">+</button>
       </div>
 
       {/* TABS */}

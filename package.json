@@ -9,7 +9,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.13.4",
+    "axios": "^1.15.0",
     "bootstrap": "^5.3.8",
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
@@ -30,6 +30,7 @@
     "react-select": "^5.10.2",
     "reactstrap": "^9.2.3",
     "sass": "^1.97.3",
+    "sweetalert2": "^11.26.24",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
