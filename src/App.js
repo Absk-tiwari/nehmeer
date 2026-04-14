@@ -5,31 +5,46 @@ import './App.css';
 import './assets/scss/app.scss'
 import 'bootstrap/dist/js/bootstrap.min.js';
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRoutes } from "react-router-dom";
+import { useEffect } from "react";
+import { getProfile } from "./redux/slices/authSlice.js";
 
-const token = localStorage.getItem('nehmeer-auth-token');
-let headers = { 'Content-Type' : 'application/json' }
+// ✅ FIXED TOKEN
+const token = localStorage.getItem('token');
 
-if(token) {
-    headers['nehmeer-token'] = token;
+let headers = { 'Content-Type': 'application/json' };
+
+if (token) {
+  headers['Authorization'] = `Bearer ${token}`; // ✅ FIXED
 }
-    
-axios.defaults.baseURL=process.env.REACT_APP_BACKEND_URI??'http://localhost:5000';
+
+axios.defaults.baseURL =
+  process.env.REACT_APP_BACKEND_URI ?? 'http://localhost:5000';
+
 axios.defaults.headers.common = headers;
 
 function App() {
 
-    const { error, errorCode } = useSelector((state) => state.auth);
-    const routing = useRoutes(Themeroutes);
+  const dispatch = useDispatch();
+  const { error, errorCode } = useSelector((state) => state.auth);
+  const routing = useRoutes(Themeroutes);
 
-    if(error) {
-        if(errorCode===500) {
-            return <ShowError error={error}/>
-        }
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      dispatch(getProfile());
     }
-    return routing;
-  
+  }, [dispatch]);
+
+  if (error) {
+    if (errorCode === 500) {
+      return <ShowError error={error} />;
+    }
+  }
+
+  return routing;
 }
 
 export default App;

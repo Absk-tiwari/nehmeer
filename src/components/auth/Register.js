@@ -71,7 +71,8 @@ const handleSignup = async () => {
       });
 
       setTimeout(() => {
-        Navigate("/otp");
+        // Navigate("/otp");
+          Navigate("/login");
       }, 2000);
     } else {
       Swal.fire({

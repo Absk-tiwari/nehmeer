@@ -111,20 +111,34 @@ export const resendOtp = createAsyncThunk(
         }
     }
 );
+export const getProfile = createAsyncThunk(
+  "auth/getProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.get("/auth/me");
+      return data;
+    } catch (err) {
+      return rejectWithValue("Session expired");
+    }
+  }
+);
 
 const authSlice = createSlice({
     name: "auth",
     initialState: {
-        user: null,
-        loading: false,
-        error: null,
-        signupSuccess: false, // 👈 NEW
+    user: null,
+    loading: false,
+    error: null,
+    signupSuccess: false,
     },
-    reducers: {
-        logout: (state) => {
-            localStorage.removeItem("token");
-            state.user = null;
-        },
+        reducers: {
+    logout: (state) => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("persist:root"); // 🔥 VERY IMPORTANT
+        state.user = null;
+        state.error = null;
+        state.loading = false;
+    },
     },
     extraReducers: (builder) => {
         builder
@@ -134,7 +148,7 @@ const authSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
+                state.user = action.payload.user || action.payload; 
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -186,6 +200,12 @@ const authSlice = createSlice({
             .addCase(resendOtp.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            .addCase(getProfile.fulfilled, (state, action) => {
+                state.user = action.payload.user || action.payload;
+            })
+            .addCase(getProfile.rejected, (state) => {
+                state.user = null;
             })
     },
 });

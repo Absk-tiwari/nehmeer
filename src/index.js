@@ -1,27 +1,27 @@
-import React, { Suspense } from 'react';
-import { Provider } from 'react-redux';
-import store from "./redux/store";
+import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { PersistGate } from "redux-persist/integration/react";
 import { HashRouter } from 'react-router-dom';
+
+import store, { persistor } from "./redux/store";
 import App from './App';
 import Loader from "./components/layouts/Loader";
 import { SearchProvider } from './contexts/SearchContext';
-import reportWebVitals from './reportWebVitals';
-import "leaflet/dist/leaflet.css";
-import "./utils/fixLeafletIcon";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
+// 🔥 DEBUG
+window.store = store;
+
 root.render(
-  <Suspense fallback={<Loader />}>
-    <Provider store={store}>
+  <Provider store={store}>
+    <PersistGate loading={<Loader />} persistor={persistor}>
       <SearchProvider>
         <HashRouter>
           <App />
         </HashRouter>
       </SearchProvider>
-    </Provider>
-  </Suspense>
+    </PersistGate>
+  </Provider>
 );
-
-reportWebVitals();
