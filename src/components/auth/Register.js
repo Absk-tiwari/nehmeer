@@ -3,92 +3,96 @@ import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.svg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../redux/slices/authSlice";
 
 const Signup = () => {
   const Navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // ✅ loader from redux
+  const { loading } = useSelector((state) => state.auth);
 
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
+
+  const [role, setRole] = useState("employer"); // ✅ NEW
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const dispatch = useDispatch();
-
-const handleSignup = async () => {
-  if (!mobile || !password || !confirmPassword) {
-    Swal.fire({
-      icon: "warning",
-      title: "Missing Fields",
-      text: "All fields are required!",
-    });
-    return;
-  }
-
-  if (!/^[6-9]\d{9}$/.test(mobile)) {
-    Swal.fire({
-      icon: "error",
-      title: "Invalid Mobile",
-      text: "Enter valid 10-digit mobile number!",
-    });
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    Swal.fire({
-      icon: "error",
-      title: "Password Mismatch",
-      text: "Passwords do not match!",
-    });
-    return;
-  }
-
-  if (!terms) {
-    Swal.fire({
-      icon: "warning",
-      title: "Accept Terms",
-      text: "Please accept Terms & Conditions",
-    });
-    return;
-  }
-
-  try {
-    const result = await dispatch(
-      registerUser({ mobile, password })
-    );
-
-    if (registerUser.fulfilled.match(result)) {
+  const handleSignup = async () => {
+    if (!mobile || !password || !confirmPassword) {
       Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "success",
-        title: "OTP Sent 📱",
-        showConfirmButton: false,
-        timer: 2000,
+        icon: "warning",
+        title: "Missing Fields",
+        text: "All fields are required!",
       });
+      return;
+    }
 
-      setTimeout(() => {
-        // Navigate("/otp");
-          Navigate("/login");
-      }, 2000);
-    } else {
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
       Swal.fire({
         icon: "error",
-        title: "Signup Failed",
-        text: result.payload,
+        title: "Invalid Mobile",
+        text: "Enter valid 10-digit mobile number!",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Swal.fire({
+        icon: "error",
+        title: "Password Mismatch",
+        text: "Passwords do not match!",
+      });
+      return;
+    }
+
+    if (!terms) {
+      Swal.fire({
+        icon: "warning",
+        title: "Accept Terms",
+        text: "Please accept Terms & Conditions",
+      });
+      return;
+    }
+
+    try {
+      const result = await dispatch(
+        registerUser({ mobile, password, role }) // ✅ role added
+      );
+
+      if (registerUser.fulfilled.match(result)) {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: `OTP Sent (${role}) 📱`,
+          showConfirmButton: false,
+          timer: 2000,
+        });
+
+        setTimeout(() => {
+          Navigate("/otp");
+        }, 2000);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Signup Failed",
+          text: result.payload,
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: "Try again later!",
       });
     }
-  } catch (err) {
-    Swal.fire({
-      icon: "error",
-      title: "Server Error",
-      text: "Try again later!",
-    });
-  }
-};
+  };
 
   return (
     <div className="login-page">
@@ -97,7 +101,15 @@ const handleSignup = async () => {
         <div className="logo-circle">
           <img src={logo} alt="ALLINEUP" />
         </div>
-        <h2>Sign Up</h2>
+       <h2>
+  Sign Up {role === "worker" ? "(Worker)" : "(Employer)"}
+</h2>
+      </div>
+
+      {/* ROLE SWITCH (hidden logic, UI untouched) */}
+      <div style={{ display: "none" }}>
+        <button onClick={() => setRole("employer")}>Employer</button>
+        <button onClick={() => setRole("worker")}>Worker</button>
       </div>
 
       {/* CARD */}
@@ -162,19 +174,27 @@ const handleSignup = async () => {
 
         {/* BUTTON */}
         <div className="login-btn-wrapper">
-          <button className="login-btn" onClick={handleSignup}>
-            Send OTP →
+          <button
+            className="login-btn"
+            onClick={handleSignup}
+            disabled={loading}
+          >
+            {loading ? "Sending OTP..." : "Send OTP →"}
           </button>
         </div>
       </div>
 
       {/* WORKER */}
-      <button
-        className="worker-btn"
-        onClick={() => Navigate("/worker-login")}
-      >
-        Login As Worker
-      </button>
+    <button
+  className="worker-btn"
+  onClick={() =>
+    setRole(role === "worker" ? "employer" : "worker")
+  }
+>
+  {role === "worker"
+    ? "Register As Employer"
+    : "Register As Worker"}
+</button>
 
       {/* LOGIN LINK */}
       <p className="signup-text">

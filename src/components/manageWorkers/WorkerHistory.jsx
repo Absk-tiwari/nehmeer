@@ -1,43 +1,72 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { manageWorkersData } from "../data/manageWorkersData";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getMyWorkers } from "../../redux/slices/workerSlice";
+
 
 const WorkerHistory = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { list, loading } = useSelector((state) => state.workers);
+
   const [openMenuId, setOpenMenuId] = useState(null);
 
+  useEffect(() => {
+    dispatch(getMyWorkers());
+  }, [dispatch]);
+
   const handleMenuToggle = (id) => {
-    setOpenMenuId(prev => (prev === id ? null : id));
+    setOpenMenuId((prev) => (prev === id ? null : id));
   };
+
+  // ✅ FILTER HISTORY WORKERS
+  const historyWorkers = list.filter(
+    (worker) => worker.status !== "active"
+  );
+
+  if (loading) return <div>Loading...</div>;
+
+  if (!historyWorkers.length) {
+    return <div>No worker history found</div>;
+  }
 
   return (
     <div className="worker-list">
-      {manageWorkersData.map((worker) => (
+      {historyWorkers.map((worker) => (
         <div className="worker-card" key={worker.id}>
-          
-          <img src={worker.image} alt={worker.name} />
+
+          <img
+            src={worker.profile_photo || "/default.png"}
+            alt={worker.name}
+          />
 
           <div className="info">
-            <h4>{worker.name}</h4>
-            <p>Experience {worker.experience}</p>
-            <p>{worker.role}</p>
+            <h4>{worker.name || "No Name"}</h4>
+
+            <p>Experience {worker.experience || "N/A"}</p>
+
+            <p>{worker.role || "Worker"}</p>
+
             <p>
-              {worker.salary.partTime.slots.join(", ")}{" "}
-              {worker.salary.partTime.price}
+              {worker.salary?.partTime?.slots?.join(", ") || ""}
+              {" "}
+              {worker.salary?.partTime?.price || ""}
             </p>
+
             <div className="worker-rating">
-              {"★".repeat(worker.rating)}
+              ⭐ {worker.rating || 0}
             </div>
           </div>
 
-          {/* Three Dot */}
+          {/* 3 DOT MENU */}
           <div className="menu-wrapper">
-           <span
-            className="three-dot-btn"
-            onClick={() => handleMenuToggle(worker.id)}
-          >
-            ⋮
-          </span>
+            <span
+              className="three-dot-btn"
+              onClick={() => handleMenuToggle(worker.id)}
+            >
+              ⋮
+            </span>
 
             {openMenuId === worker.id && (
               <div className="dropdown">

@@ -8,6 +8,7 @@ const PostTabs = ({ activeTab, setActiveTab }) => {
       {tabs.map((tab) => (
         <button
           key={tab}
+          type="button" // ✅ prevent form submit issue
           className={`tabBtn ${activeTab === tab ? "activeTab" : ""}`}
           onClick={() => setActiveTab(tab)}
         >

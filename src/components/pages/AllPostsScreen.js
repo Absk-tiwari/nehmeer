@@ -4,73 +4,27 @@ import PostTabs from "../posts/PostTabs";
 import RecommendedWorkerCard from "../../workers/RecommendedWorkerCard";
 import { serviceData } from "../data/serviceData";
 import { useNavigate } from "react-router-dom";
-// import RecommendedWorkerCard from "../workers/RecommendedWorkerCard"; // ✅ fixed path if inside components
+import { useDispatch, useSelector } from "react-redux";
+import { getMyPosts } from "../../redux/slices/postSlice";
 
 const AllPostsScreen = () => {
   const [activeTab, setActiveTab] = useState("All Posts");
-  const [posts, setPosts] = useState([]);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { list: posts, loading, error } = useSelector(
+    (state) => state.posts
+  );
+
   const [workers, setWorkers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const Navigate = useNavigate();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    dispatch(getMyPosts());
+    setWorkers(serviceData); // later replace with API
+  }, [dispatch]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      // 🔹 Dummy Posts
-      const dummyPosts = [
-        {
-          id: 1,
-          title: "Cook",
-          experience: "3 Years",
-          location: "Noida sector 78",
-          status: "Open",
-          extra: "6 Contacts for you",
-        },
-        {
-          id: 2,
-          title: "Dog sitter",
-          experience: "1 Years",
-          location: "Noida sector 78",
-          status: "Closed",
-          extra: "1 Hired . 22 Jun, 2024",
-        },
-        {
-          id: 3,
-          title: "Driver",
-          experience: "1 Years",
-          location: "Noida sector 78",
-          status: "Closed",
-          extra: "1 Hired . 12 Feb",
-        },
-      ];
-
-      // 🔹 Dummy Workers
- 
-
-      // 🔥 When API comes:
-      // const postRes = await fetch("/api/posts");
-      // const postData = await postRes.json();
-      // setPosts(postData);
-
-      // const workerRes = await fetch("/api/workers");
-      // const workerData = await workerRes.json();
-      // setWorkers(workerData);
-
-      setPosts(dummyPosts);
-      setWorkers(serviceData);
-
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 🔥 FILTER LOGIC (same UI)
   const filteredPosts =
     activeTab === "All Posts"
       ? posts
@@ -84,10 +38,39 @@ const AllPostsScreen = () => {
     <div className="allPostsContainer">
 
       {/* HEADER */}
-      <div className="headerRow">
-        <h2>All Posts</h2>
-        <button onClick={()=>Navigate("/create-post")} className="addBtn">+</button>
-      </div>
+     <div
+  className="headerRow"
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "10px",
+  }}
+>
+  <h2 style={{ margin: 0 }}>All Posts</h2>
+
+  <button
+    onClick={() => navigate("/create-post")}
+    className="addBtn"
+    style={{
+      width:"10%",
+    
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      padding: "6px 12px",
+      borderRadius: "6px",
+      border: "none",
+      backgroundColor: "#000",
+      color: "#fff",
+      fontSize: "14px",
+      cursor: "pointer",
+    }}
+  >
+    <span style={{ fontSize: "14px", fontWeight: "bold", margin:"auto" }}> Create Post</span>
+    
+  </button>
+</div>
 
       {/* TABS */}
       <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -95,6 +78,8 @@ const AllPostsScreen = () => {
       {/* POSTS */}
       {loading ? (
         <p>Loading posts...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>{error}</p>
       ) : (
         <div className="postList">
           {filteredPosts.length > 0 ? (
@@ -107,7 +92,7 @@ const AllPostsScreen = () => {
         </div>
       )}
 
-      {/* RECOMMENDED SECTION */}
+      {/* RECOMMENDED */}
       <h2 style={{ marginTop: "40px" }}>
         Recommended Workers for you
       </h2>
@@ -124,7 +109,6 @@ const AllPostsScreen = () => {
           <p>No workers available</p>
         )}
       </div>
-
     </div>
   );
 };

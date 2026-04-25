@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import createPostOptions from "../data/createPostOptions";
+import { useDispatch, useSelector } from "react-redux";
+import { createPost, resetCreatePost } from "../../redux/slices/postSlice";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const CreatePost = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { createLoading, createSuccess, createError } = useSelector(
+    (state) => state.posts
+  );
+
   const [policeVerification, setPoliceVerification] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -24,30 +35,57 @@ const CreatePost = () => {
     }));
   };
 
+  // ✅ SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // 🔥 Validation (industry level)
+    if (!formData.lookingFor || !formData.location) {
+      return Swal.fire(
+        "Missing Fields",
+        "Please fill required fields",
+        "warning"
+      );
+    }
 
     const finalData = {
       ...formData,
       policeVerification,
     };
 
-    console.log("Submitting:", finalData);
-
-    // Later you can send this to backend
-    // fetch("/api/create-post", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(finalData),
-    // });
+    dispatch(createPost(finalData));
   };
+
+  // ✅ SUCCESS HANDLING
+  useEffect(() => {
+    if (createSuccess) {
+      Swal.fire({
+        icon: "success",
+        title: "Post Created 🎉",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      navigate("/posts"); // change if route different
+      dispatch(resetCreatePost());
+    }
+  }, [createSuccess, navigate, dispatch]);
+
+  // ❌ ERROR HANDLING
+  useEffect(() => {
+    if (createError) {
+      Swal.fire("Error", createError, "error");
+    }
+  }, [createError]);
 
   return (
     <div className="create-post-wrapper">
       <div className="create-post-container">
 
         <div className="page-header">
-          <span className="back-arrow">←</span>
+          <span className="back-arrow" onClick={() => navigate(-1)}>
+            ←
+          </span>
           <span>Create a new post</span>
         </div>
 
@@ -115,6 +153,7 @@ const CreatePost = () => {
               ))}
             </select>
           </div>
+
           {/* Experience Level */}
           <div className="form-group">
             <label>Experience Level</label>
@@ -165,6 +204,7 @@ const CreatePost = () => {
               ))}
             </select>
           </div>
+
           {/* Description */}
           <div className="form-group">
             <label>Description</label>
@@ -175,6 +215,7 @@ const CreatePost = () => {
               placeholder="Write your words"
             />
           </div>
+
           {/* Checkbox */}
           <div className="checkbox-row">
             <input
@@ -185,8 +226,13 @@ const CreatePost = () => {
             <span>Police verification required</span>
           </div>
 
-          <button type="submit" className="submit-btn">
-            Post Your Requirement
+          {/* BUTTON */}
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={createLoading}
+          >
+            {createLoading ? "Posting..." : "Post Your Requirement"}
           </button>
 
         </form>
@@ -194,4 +240,5 @@ const CreatePost = () => {
     </div>
   );
 };
+
 export default CreatePost;

@@ -1,11 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { createPost } from "../../redux/slices/postSlice";
 
 
 const CustomRequirements = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [step, setStep] = useState(1);
 
+  // ✅ MAIN FORM STATE
+  const [formData, setFormData] = useState({
+    title: "Babysitter",
+    location: "Delhi",
+    availability: "Part-time",
+    shift: "Midday",
+    experience: "Intermediate",
+    duties: [],
+    description: "",
+  });
+
+  // ✅ DUTIES STATE
   const [duties, setDuties] = useState({
     food: true,
     feeding: true,
@@ -18,8 +34,46 @@ const CustomRequirements = () => {
     related: true,
   });
 
+  // 🔥 HANDLE DUTY (IMPORTANT FIX)
   const toggleDuty = (key) => {
-    setDuties({ ...duties, [key]: !duties[key] });
+    const updated = {
+      ...duties,
+      [key]: !duties[key],
+    };
+
+    setDuties(updated);
+
+    const selected = Object.keys(updated).filter((k) => updated[k]);
+
+    setFormData((prev) => ({
+      ...prev,
+      duties: selected,
+    }));
+  };
+
+  // 🔥 HANDLE CHANGE
+  const handleChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
+  // 🔥 SUBMIT
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.location) {
+      return alert("Please fill required fields");
+    }
+
+    try {
+      const result = await dispatch(createPost(formData));
+
+      if (createPost.fulfilled.match(result)) {
+        alert("Post Created Successfully ✅");
+        navigate("/my-posts");
+      } else {
+        alert(result.payload);
+      }
+    } catch {
+      alert("Something went wrong");
+    }
   };
 
   return (
@@ -32,35 +86,28 @@ const CustomRequirements = () => {
       </div>
 
       {/* STEP TABS */}
-     <div className="req-tabs">
-  <span
-    className={step === 1 ? "active" : ""}
-    onClick={() => navigate("/custom-requirements")}
-  >
-    Requirement details
-  </span>
+      <div className="req-tabs">
+        <span className={step === 1 ? "active" : ""}>
+          Requirement details
+        </span>
 
-  <span
-    className={step === 2 ? "active" : ""}
-    onClick={() => navigate("/custom-duties")}
-  >
-    Duties
-  </span>
+        <span className={step === 2 ? "active" : ""}>
+          Duties
+        </span>
 
-  <span
-    className={step === 3 ? "active" : ""}
-    onClick={() => navigate("/custom-submit")}
-  >
-    Submit
-  </span>
-</div>
+        <span className={step === 3 ? "active" : ""}>
+          Submit
+        </span>
+      </div>
 
       {/* STEP 1 */}
       {step === 1 && (
         <div className="req-body">
 
           <label>I am looking for a</label>
-          <select>
+          <select
+            onChange={(e) => handleChange("title", e.target.value)}
+          >
             <option>Babysitter</option>
             <option>Cook</option>
             <option>Driver</option>
@@ -68,36 +115,87 @@ const CustomRequirements = () => {
 
           <label>Location</label>
           <div className="location-box">
-            Bolpur, Nayek Para, Birbhum, Pin - 731204
+            {formData.location}
             <span>CHANGE</span>
           </div>
 
           <label>Availability</label>
           <div className="chips">
-            <button className="chip">Full-time</button>
-            <button className="chip active">Part-time</button>
-            <button className="chip">On-call/Occasional</button>
+            <button
+              className="chip"
+              onClick={() => handleChange("availability", "Full-time")}
+            >
+              Full-time
+            </button>
+
+            <button
+              className="chip active"
+              onClick={() => handleChange("availability", "Part-time")}
+            >
+              Part-time
+            </button>
+
+            <button
+              className="chip"
+              onClick={() =>
+                handleChange("availability", "On-call")
+              }
+            >
+              On-call/Occasional
+            </button>
           </div>
 
           <label>Shift Divisions</label>
           <div className="radio-group">
-            <label><input type="radio" name="shift" /> Morning Shift: 6 AM – 10 AM</label>
-            <label><input type="radio" name="shift" defaultChecked/> Midday Shift: 11 AM – 2 PM</label>
-            <label><input type="radio" name="shift" /> Evening Shift: 5 PM – 9 PM</label>
-            <label><input type="radio" name="shift" /> Night Shift: 9 PM – 12 AM</label>
+            <label>
+              <input
+                type="radio"
+                name="shift"
+                onChange={() => handleChange("shift", "Morning")}
+              />
+              Morning Shift
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="shift"
+                defaultChecked
+                onChange={() => handleChange("shift", "Midday")}
+              />
+              Midday Shift
+            </label>
           </div>
 
           <label>Experience of worker</label>
           <div className="radio-group">
-            <label><input type="radio" name="exp"/> Beginner (0-1 years)</label>
-            <label><input type="radio" name="exp" defaultChecked/> Intermediate (2-5 years)</label>
-            <label><input type="radio" name="exp"/> Experienced (5+ years)</label>
+            <label>
+              <input
+                type="radio"
+                name="exp"
+                onChange={() =>
+                  handleChange("experience", "Beginner")
+                }
+              />
+              Beginner
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="exp"
+                defaultChecked
+                onChange={() =>
+                  handleChange("experience", "Intermediate")
+                }
+              />
+              Intermediate
+            </label>
           </div>
 
           <button className="next-btn" onClick={() => setStep(2)}>
             Next →
           </button>
-
         </div>
       )}
 
@@ -105,58 +203,28 @@ const CustomRequirements = () => {
       {step === 2 && (
         <div className="req-body">
 
-          <div className="duty">
-            <span>Baby food preparing</span>
-            <input type="checkbox" checked={duties.food} onChange={() => toggleDuty("food")} />
-          </div>
-
-          <div className="duty">
-            <span>Baby feeding</span>
-            <input type="checkbox" checked={duties.feeding} onChange={() => toggleDuty("feeding")} />
-          </div>
-
-          <div className="duty">
-            <span>Baby Bathing</span>
-            <input type="checkbox" checked={duties.bathing} onChange={() => toggleDuty("bathing")} />
-          </div>
-
-          <div className="duty">
-            <span>Pickup for school</span>
-            <input type="checkbox" checked={duties.pickup} onChange={() => toggleDuty("pickup")} />
-          </div>
-
-          <div className="duty">
-            <span>Changing diaper</span>
-            <input type="checkbox" checked={duties.diaper} onChange={() => toggleDuty("diaper")} />
-          </div>
-
-          <div className="duty">
-            <span>Cleaning utensils of baby</span>
-            <input type="checkbox" checked={duties.cleaning} onChange={() => toggleDuty("cleaning")} />
-          </div>
-
-          <div className="duty">
-            <span>Taking baby for walk</span>
-            <input type="checkbox" checked={duties.walk} onChange={() => toggleDuty("walk")} />
-          </div>
-
-          <div className="duty">
-            <span>Preparing baby for sleep</span>
-            <input type="checkbox" checked={duties.sleep} onChange={() => toggleDuty("sleep")} />
-          </div>
-
-          <div className="duty">
-            <span>Baby related all work</span>
-            <input type="checkbox" checked={duties.related} onChange={() => toggleDuty("related")} />
-          </div>
+          {Object.keys(duties).map((key) => (
+            <div className="duty" key={key}>
+              <span>{key}</span>
+              <input
+                type="checkbox"
+                checked={duties[key]}
+                onChange={() => toggleDuty(key)}
+              />
+            </div>
+          ))}
 
           <label>Add more details</label>
-          <textarea placeholder="Write..." />
+          <textarea
+            placeholder="Write..."
+            onChange={(e) =>
+              handleChange("description", e.target.value)
+            }
+          />
 
           <button className="next-btn" onClick={() => setStep(3)}>
             Next →
           </button>
-
         </div>
       )}
 
@@ -164,30 +232,39 @@ const CustomRequirements = () => {
       {step === 3 && (
         <div className="req-body summary">
 
-          <p><strong>I am looking for a</strong><br/>Babysitter</p>
+          <p>
+            <strong>I am looking for a</strong>
+            <br />
+            {formData.title}
+          </p>
 
-          <p><strong>Location</strong><br/>Delhi, India</p>
+          <p>
+            <strong>Location</strong>
+            <br />
+            {formData.location}
+          </p>
 
-          <p><strong>Availability</strong><br/>Part-time</p>
+          <p>
+            <strong>Availability</strong>
+            <br />
+            {formData.availability}
+          </p>
 
-          <p><strong>Shift Divisions</strong><br/>11 AM–2 PM</p>
+          <p>
+            <strong>Shift</strong>
+            <br />
+            {formData.shift}
+          </p>
 
-          <p><strong>Experience</strong><br/>Intermediate (2-5 years)</p>
+          <p>
+            <strong>Experience</strong>
+            <br />
+            {formData.experience}
+          </p>
 
-          <p><strong>Language Proficiency</strong><br/>Bengali</p>
-
-          <p><strong>Religion Preference</strong><br/>Hindu</p>
-
-          <p><strong>Gender Preference</strong><br/>Female</p>
-
-          <p><strong>Age Preference</strong><br/>Adult (21–40)</p>
-
-          <p><strong>Salary preference</strong><br/>Monthly</p>
-
-          <button className="next-btn">
+          <button className="next-btn" onClick={handleSubmit}>
             Confirm & Submit
           </button>
-
         </div>
       )}
 

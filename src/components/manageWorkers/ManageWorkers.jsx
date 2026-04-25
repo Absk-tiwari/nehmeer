@@ -1,9 +1,19 @@
-import { useState } from "react";
-import JoinedWorkers from "./JoinedWorkers";
-import WorkerHistory from "./WorkerHistory";
+import { useState, lazy, Suspense } from "react";
+
+// 🔥 Lazy load (performance boost)
+const JoinedWorkers = lazy(() => import("./JoinedWorkers"));
+const WorkerHistory = lazy(() => import("./WorkerHistory"));
 
 const ManageWorkers = () => {
-  const [activeTab, setActiveTab] = useState("joined");
+  // 🔥 Persist tab (refresh pe same tab open hoga)
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("workerTab") || "joined"
+  );
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem("workerTab", tab);
+  };
 
   return (
     <div className="manage-container">
@@ -11,23 +21,28 @@ const ManageWorkers = () => {
         <h2>Manage Workers</h2>
       </div>
 
+      {/* TABS */}
       <div className="tabs">
         <button
           className={activeTab === "joined" ? "active" : ""}
-          onClick={() => setActiveTab("joined")}
+          onClick={() => handleTabChange("joined")}
         >
           Joined for work
         </button>
 
         <button
           className={activeTab === "history" ? "active" : ""}
-          onClick={() => setActiveTab("history")}
+          onClick={() => handleTabChange("history")}
         >
           History
         </button>
       </div>
 
-      {activeTab === "joined" ? <JoinedWorkers /> : <WorkerHistory />}
+      {/* 🔄 LAZY LOADING */}
+      <Suspense fallback={<div className="loader">Loading...</div>}>
+        {activeTab === "joined" && <JoinedWorkers />}
+        {activeTab === "history" && <WorkerHistory />}
+      </Suspense>
     </div>
   );
 };

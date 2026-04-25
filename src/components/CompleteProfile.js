@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { useDispatch, useSelector } from "react-redux";
+import { saveProfile } from "../redux/slices/profileSlice";
+
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // 🔮 Future /API ready state
+  // ✅ use profile loader (not auth)
+  const { loading } = useSelector((state) => state.profile);
+
   const [formData, setFormData] = useState({
     name: "",
     whatsapp: "",
@@ -13,26 +20,82 @@ const CompleteProfile = () => {
     location: "",
   });
 
+  // ✅ Auto-fill mobile
+  useEffect(() => {
+    const mobile = localStorage.getItem("signupMobile");
+
+    if (mobile) {
+      setFormData((prev) => ({
+        ...prev,
+        whatsapp: mobile,
+      }));
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSave = () => {
-    console.log("Profile Data:", formData);
+  // ✅ Validation
+  const validateForm = () => {
+    const { name, whatsapp, gender, lookingFor, location } = formData;
 
-    // 🔮 FUTURE
-    // dispatch(saveProfile(formData))
-    navigate("/dashboard");
+    if (!name.trim()) return "Name is required";
+
+    if (!/^[6-9]\d{9}$/.test(whatsapp)) {
+      return "Enter valid WhatsApp number";
+    }
+
+    if (!gender) return "Please select gender";
+
+    if (!lookingFor.trim()) {
+      return "Please enter what you are looking for";
+    }
+
+    if (!location) return "Please select location";
+
+    return null;
+  };
+
+  const handleSave = async () => {
+    const error = validateForm();
+
+    if (error) {
+      return Swal.fire("Validation Error", error, "warning");
+    }
+
+    try {
+      const role = localStorage.getItem("signupRole");
+
+      const result = await dispatch(
+        saveProfile({ ...formData, role })
+      );
+
+      if (saveProfile.fulfilled.match(result)) {
+        Swal.fire({
+          icon: "success",
+          title: "Profile Completed 🎉",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        navigate("/dashboard");
+      } else {
+        Swal.fire("Error", result.payload, "error");
+      }
+    } catch (err) {
+      Swal.fire("Error", "Something went wrong", "error");
+    }
   };
 
   return (
-    <div className="login-page">
-      {/* CONTENT */}
-      <div className="profile-page">
+    <div className="login-page" >
+      <div className="profile-page" style={{border: "1px solid #ccc", borderRadius:"6px"}}>
         <h2 className="profile-title">Complete your Profile</h2>
 
         {/* NAME */}
@@ -101,12 +164,14 @@ const CompleteProfile = () => {
             <option value="bangalore">Bangalore</option>
           </select>
         </div>
-      </div>
 
-      {/* ACTION BUTTONS */}
-      <div className="profile-actions">
-        <button className="login-btn full-btn" onClick={handleSave}>
-          Save Details
+ <div className="profile-actions">
+        <button
+          className="login-btn full-btn"
+          onClick={handleSave}
+          disabled={loading}
+        >
+          {loading ? "Saving..." : "Save Details"}
         </button>
 
         <button
@@ -116,6 +181,11 @@ const CompleteProfile = () => {
           Skip for now
         </button>
       </div>
+
+      </div>
+
+      {/* ACTION BUTTONS */}
+     
     </div>
   );
 };

@@ -30,13 +30,26 @@ function App() {
   const { error, errorCode } = useSelector((state) => state.auth);
   const routing = useRoutes(Themeroutes);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
 
-    if (token) {
-      dispatch(getProfile());
-    }
-  }, [dispatch]);
+
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  console.log("TOKEN:", token);
+
+  if (token) {
+    dispatch(getProfile());
+  }
+}, [dispatch]);
+
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+
+  //   if (token) {
+  //     dispatch(getProfile());
+  //   }
+  // }, [dispatch]);
+
+  
 
   if (error) {
     if (errorCode === 500) {

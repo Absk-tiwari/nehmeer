@@ -1,77 +1,109 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { serviceData } from "../data/serviceData";
+import { useDispatch, useSelector } from "react-redux";
+
 import ServiceCard from "../service/ServiceCard";
+import { getFavourites } from "../../redux/slices/favouriteSlice";
 
 const Favourites = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-const navigate = useNavigate();
+  const { list, loading } = useSelector(
+    (state) => state.favourites
+  );
 
-/* Dummy favourite ids (Later API will provide this) */
+  useEffect(() => {
+    dispatch(getFavourites());
+  }, [dispatch]);
 
-const [favourites] = useState([1, 3, 5]);
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", marginTop: 50 }}>
+        Loading favourites...
+      </div>
+    );
+  }
 
-/* Filter favourite services */
+  return (
+    <div className="app-shell">
 
-const favouriteServices = serviceData.filter(service =>
-favourites.includes(service.id)
-);
+      <div className="service-list">
 
-return (
+        {/* HEADER */}
+        <div className="service-header">
 
-<div className="app-shell">
+          <div className="header-top">
 
-<div className="service-list">
+            <button
+              className="back-btn"
+              onClick={() => navigate(-1)}
+            >
+              ←
+            </button>
 
-{/* HEADER */}
+            <h2>Favourites</h2>
 
-<div className="service-header">
+          </div>
+        </div>
 
-<div className="header-top">
+        {/* LIST */}
+        {list?.length > 0 ? (
 
-<button
-className="back-btn"
-onClick={() => navigate(-1)}
->
-←
-</button>
+          list.map((service) => (
 
-<h2>Favourites</h2>
+            <ServiceCard
+              key={service.id}
+              service={service}
+              onClick={() =>
+                navigate(`/services/${service.type}/${service.id}`)
+              }
+            />
 
-</div>
+          ))
 
-</div>
+        ) : (
 
-{/* SERVICE LIST */}
+          /* ⭐ EMPTY STATE (INDUSTRY LEVEL) */
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "80px",
+              padding: "20px",
+            }}
+          >
+            <div style={{ fontSize: "60px" }}>❤️</div>
 
-{favouriteServices.length > 0 ? (
+            <h3 style={{ marginTop: "10px" }}>
+              No Favourites Yet
+            </h3>
 
-favouriteServices.map((service) => (
+            <p style={{ color: "#777", fontSize: "14px" }}>
+              Save your favourite services here for quick access.
+            </p>
 
-<ServiceCard
-key={service.id}
-service={service}
-onClick={() =>
-navigate(`/services/${service.type}/${service.id}`)
-}
-/>
+            <button
+              onClick={() => navigate("/dashboard")}
+              style={{
+                marginTop: "15px",
+                padding: "10px 18px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#000",
+                color: "#fff",
+                cursor: "pointer",
+              }}
+            >
+              Explore Services
+            </button>
+          </div>
 
-))
+        )}
 
-) : (
+      </div>
 
-<div className="no-favourites">
-No favourite services yet
-</div>
-
-)}
-
-</div>
-
-</div>
-
-);
-
+    </div>
+  );
 };
 
 export default Favourites;

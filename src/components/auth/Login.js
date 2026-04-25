@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo from "../../assets/img/logo.svg";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../redux/slices/authSlice";
 
 const Login = () => {
@@ -11,59 +11,75 @@ const Login = () => {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [role, setRole] = useState("employer");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
+  const { loading } = useSelector((state) => state.auth);
+
+  // ✅ Autofill remembered mobile
+  useEffect(() => {
+    const savedMobile = localStorage.getItem("userMobile");
+    const savedRole = localStorage.getItem("userRole");
+
+    if (savedMobile) {
+      setMobile(savedMobile);
+      setRemember(true);
+    }
+
+    if (savedRole) {
+      setRole(savedRole); // ✅ restore role
+    }
+  }, []);
 
   const handleLogin = async () => {
-    // ✅ Validation
     if (!mobile || !password) {
-      Swal.fire({
-        icon: "warning",
-        title: "Missing Fields",
-        text: "All fields are required!",
-      });
-      return;
+      return Swal.fire("Missing Fields", "All fields required!", "warning");
     }
 
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Mobile",
-        text: "Enter valid 10-digit mobile number!",
-      });
-      return;
+      return Swal.fire("Invalid Mobile", "Enter valid number", "error");
     }
 
     try {
       const result = await dispatch(
-        loginUser({ mobile, password })
-      ).unwrap();
-      
-      // ✅ Remember Me
-      if (remember) {
-        localStorage.setItem("userMobile", mobile);
+        loginUser({ mobile, password, role })
+      );
+
+      if (loginUser.fulfilled.match(result)) {
+
+        // ✅ Remember Me
+        if (remember) {
+          localStorage.setItem("userMobile", mobile);
+        } else {
+          localStorage.removeItem("userMobile");
+        }
+
+        // ✅ Save role for future
+        localStorage.setItem("userRole", role);
+
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: `Login Successful (${role}) 🎉`,
+          showConfirmButton: false,
+          timer: 2000,
+        });
+
+        // ✅ ROLE BASED REDIRECT (INDUSTRY LEVEL)
+        if (role === "worker") {
+          navigate("/worker-dashboard"); // 👉 create later if not exist
+        } else {
+          navigate("/dashboard");
+        }
+
+      } else {
+        Swal.fire("Login Failed", result.payload, "error");
       }
-
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "success",
-        title: "Login Successful 🎉",
-        showConfirmButton: false,
-        timer: 2000,
-      });
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: error,
-      });
+      Swal.fire("Error", "Something went wrong", "error");
     }
   };
 
@@ -73,7 +89,16 @@ const Login = () => {
         <div className="logo-circle">
           <img src={logo} alt="ALLINEUP" />
         </div>
-        <h2>Login</h2>
+
+        <h2>
+          Login {role === "worker" ? "(Worker)" : "(Employer)"}
+        </h2>
+      </div>
+
+      {/* hidden role switch */}
+      <div style={{ display: "none" }}>
+        <button onClick={() => setRole("employer")}>Employer</button>
+        <button onClick={() => setRole("worker")}>Worker</button>
       </div>
 
       <div className="login-card">
@@ -111,6 +136,7 @@ const Login = () => {
             />
             <span>Remember Me</span>
           </div>
+
           <span
             className="forgot"
             onClick={() => navigate("/forgot-password")}
@@ -120,17 +146,30 @@ const Login = () => {
         </div>
 
         <div className="login-btn-wrapper">
-          <button className="login-btn" onClick={handleLogin}>
-            Login <Icon icon="mdi:arrow-right" />
+          <button
+            className="login-btn"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : (
+              <>
+                Login <Icon icon="mdi:arrow-right" />
+              </>
+            )}
           </button>
         </div>
       </div>
 
+      {/* ROLE TOGGLE */}
       <button
         className="worker-btn"
-        onClick={() => navigate("/worker-login")}
+        onClick={() =>
+          setRole(role === "worker" ? "employer" : "worker")
+        }
       >
-        Login As Worker
+        {role === "worker"
+          ? "Login As Employer"
+          : "Login As Worker"}
       </button>
 
       <p className="signup-text">

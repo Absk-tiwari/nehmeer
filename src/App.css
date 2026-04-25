@@ -321,7 +321,7 @@
 /* HEADER */
 .top-header {
   height: 60px;
-  padding: 0 16px;
+  padding: 0 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -574,7 +574,7 @@ dashboard-profile */
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  margin: 16px 0;
+  margin: 16px 8px;
 }
 
 .profile-progress-left h3 {

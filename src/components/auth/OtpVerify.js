@@ -1,19 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import forgot from "../../assets/img/forgot.svg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resendOtp, verifyOtp } from "../../redux/slices/authSlice";
 import { getUserMobile, maskMobile } from "../../utils/mobileHelper";
 
 const mobile = getUserMobile();
 
-
 const OtpVerify = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const { loading } = useSelector((state) => state.auth);
 
+  // ✅ 6 digit OTP
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+
+  // ⏳ resend timer
+  const [timer, setTimer] = useState(30);
+
+  // 🔁 countdown
+  useEffect(() => {
+    if (timer <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  // 🔢 handle input
   const handleChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) return;
 
@@ -25,112 +43,115 @@ const OtpVerify = () => {
     if (value && index < otp.length - 1) {
       document.getElementById(`otp-${index + 1}`)?.focus();
     }
+
+    // 🔥 auto submit when full
+    if (newOtp.join("").length === 6) {
+      handleVerify(newOtp.join(""));
+    }
   };
 
-  // 👉 backspace focus previous
+  // ⬅️ backspace
   const handleKeyDown = (e, index) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
- const dispatch = useDispatch();
+  // 📋 paste support
+  const handlePaste = (e) => {
+    const pasteData = e.clipboardData.getData("text").slice(0, 6);
 
-const handleVerify = async () => {
-  const enteredOtp = otp.join("");
+    if (!/^\d+$/.test(pasteData)) return;
 
-  if (enteredOtp.length !== 4) {
-    Swal.fire({
-      icon: "warning",
-      title: "Invalid OTP",
-      text: "Please enter complete 4-digit OTP!",
-    });
-    return;
-  }
+    const newOtp = pasteData.split("");
+    setOtp(newOtp);
 
-  try {
-    const result = await dispatch(verifyOtp({ otp: enteredOtp }));
+    // focus last
+    document.getElementById(`otp-${newOtp.length - 1}`)?.focus();
 
-    if (verifyOtp.fulfilled.match(result)) {
-      Swal.fire({
-        icon: "success",
-        title: "OTP Verified ✅",
-        timer: 1500,
-        showConfirmButton: false,
-      }).then(() => {
-        // 🔥 Flow handle
-        const isForgot = localStorage.getItem("resetMobile");
-
-        if (isForgot) {
-          navigate("/reset-password");
-        } else {
-          navigate("/complete-profile");
-        }
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid OTP",
-        text: result.payload,
-      });
+    if (newOtp.length === 6) {
+      handleVerify(pasteData);
     }
-  } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Server Error",
-      text: "Unable to verify OTP!",
-    });
-  }
-};
+  };
 
-const handleResend = async () => {
-  try {
-    const result = await dispatch(resendOtp());
+  // ✅ verify
+  const handleVerify = async (autoOtp) => {
+    const enteredOtp = autoOtp || otp.join("");
 
-    if (resendOtp.fulfilled.match(result)) {
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "success",
-        title: "OTP Resent 📱",
-        showConfirmButton: false,
-        timer: 2000,
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: result.payload,
-      });
+    if (enteredOtp.length !== 6) {
+      return Swal.fire("Invalid OTP", "Enter 6-digit OTP", "warning");
     }
-  } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Failed to resend OTP!",
-    });
-  }
-};
+
+    try {
+      const result = await dispatch(verifyOtp({ otp: enteredOtp }));
+
+      if (verifyOtp.fulfilled.match(result)) {
+        Swal.fire({
+          icon: "success",
+          title: "OTP Verified ✅",
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          const isForgot = localStorage.getItem("resetMobile");
+
+          if (isForgot) {
+            navigate("/reset-password");
+          } else {
+            navigate("/complete-profile");
+          }
+        });
+      } else {
+        Swal.fire("Invalid OTP", result.payload, "error");
+      }
+    } catch {
+      Swal.fire("Error", "Unable to verify OTP!", "error");
+    }
+  };
+
+  // 🔁 resend
+  const handleResend = async () => {
+    if (timer > 0) return;
+
+    try {
+      const result = await dispatch(resendOtp());
+
+      if (resendOtp.fulfilled.match(result)) {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: "OTP Resent 📱",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        setTimer(30); // reset timer
+      } else {
+        Swal.fire("Error", result.payload, "error");
+      }
+    } catch {
+      Swal.fire("Error", "Failed to resend OTP!", "error");
+    }
+  };
 
   return (
     <div className="login-page">
+
       {/* TOP */}
       <div className="login-top">
-        <div>
-          <img src={forgot} alt="ALLINEUP" />
-        </div>
+        <img src={forgot} alt="ALLINEUP" />
       </div>
 
       {/* CARD */}
       <div className="login-card otp-card">
+
         <p className="otp-text">
-          We have sent OTP on your number
-          <br />
+          We have sent OTP on your number <br />
           <strong>{maskMobile(mobile)}</strong>
         </p>
 
         {/* OTP INPUTS */}
-        <div className="otp-inputs">
+        <div className="otp-inputs" onPaste={handlePaste}>
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -143,26 +164,32 @@ const handleResend = async () => {
           ))}
         </div>
 
+        {/* RESEND */}
         <p className="resend-text">
           Didn’t receive OTP?{" "}
-          <span onClick={handleResend}>Resend</span>
+          <span
+            onClick={handleResend}
+            style={{
+              color: timer > 0 ? "gray" : "blue",
+              cursor: timer > 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            {timer > 0 ? `Resend in ${timer}s` : "Resend"}
+          </span>
         </p>
 
         {/* BUTTON */}
         <div className="login-btn-wrapper">
-          <button className="login-btn" onClick={handleVerify}>
-            Verify OTP →
+          <button
+            className="login-btn"
+            onClick={() => handleVerify()}
+            disabled={loading}
+          >
+            {loading ? "Verifying..." : "Verify OTP →"}
           </button>
         </div>
-      </div>
 
-      {/* WORKER */}
-      <button
-        className="worker-btn"
-        onClick={() => navigate("/worker-login")}
-      >
-        Login As Worker
-      </button>
+      </div>
 
       {/* BACK */}
       <p className="signup-text">
