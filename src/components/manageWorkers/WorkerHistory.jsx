@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
+import SkeletonLoader from "../common/SkeletonLoader";
 
 
 const WorkerHistory = () => {
@@ -25,7 +26,7 @@ const WorkerHistory = () => {
     (worker) => worker.status !== "active"
   );
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <SkeletonLoader type="worker" count={3} />;
 
   if (!historyWorkers.length) {
     return <div>No worker history found</div>;

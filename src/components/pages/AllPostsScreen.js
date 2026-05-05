@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import PostCard from "../posts/PostCard";
 import PostTabs from "../posts/PostTabs";
 import RecommendedWorkerCard from "../../workers/RecommendedWorkerCard";
+import SkeletonLoader from "../common/SkeletonLoader";
 import { serviceData } from "../data/serviceData";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyPosts } from "../../redux/slices/postSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const AllPostsScreen = () => {
   const [activeTab, setActiveTab] = useState("All Posts");
@@ -21,10 +24,9 @@ const AllPostsScreen = () => {
 
   useEffect(() => {
     dispatch(getMyPosts());
-    setWorkers(serviceData); // later replace with API
+    setWorkers(serviceData);
   }, [dispatch]);
 
-  // 🔥 FILTER LOGIC (same UI)
   const filteredPosts =
     activeTab === "All Posts"
       ? posts
@@ -37,49 +39,28 @@ const AllPostsScreen = () => {
   return (
     <div className="allPostsContainer">
 
-      {/* HEADER */}
-     <div
-  className="headerRow"
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "10px",
-  }}
->
-  <h2 style={{ margin: 0 }}>All Posts</h2>
+      <div className="headerRow">
+        <h2>All Posts</h2>
 
-  <button
-    onClick={() => navigate("/create-post")}
-    className="addBtn"
-    style={{
-      width:"10%",
-    
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      padding: "6px 12px",
-      borderRadius: "6px",
-      border: "none",
-      backgroundColor: "#000",
-      color: "#fff",
-      fontSize: "14px",
-      cursor: "pointer",
-    }}
-  >
-    <span style={{ fontSize: "14px", fontWeight: "bold", margin:"auto" }}> Create Post</span>
-    
-  </button>
-</div>
+        <button
+          onClick={() => navigate("/create-post")}
+          className="createPostBtn"
+        >
+          <FontAwesomeIcon icon={faPlus} />
+          <span>Create Post</span>
+        </button>
+      </div>
 
-      {/* TABS */}
       <PostTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* POSTS */}
       {loading ? (
-        <p>Loading posts...</p>
+        <div className="postList">
+          <SkeletonLoader type="post" count={3} />
+        </div>
       ) : error ? (
-        <p style={{ color: "red" }}>{error}</p>
+        <div className="error-message">
+          <p>{error}</p>
+        </div>
       ) : (
         <div className="postList">
           {filteredPosts.length > 0 ? (
@@ -87,13 +68,14 @@ const AllPostsScreen = () => {
               <PostCard key={post.id} item={post} />
             ))
           ) : (
-            <p>No posts found</p>
+            <div className="empty-state">
+              <p>No posts found</p>
+            </div>
           )}
         </div>
       )}
 
-      {/* RECOMMENDED */}
-      <h2 style={{ marginTop: "40px" }}>
+      <h2 className="section-heading">
         Recommended Workers for you
       </h2>
 
@@ -106,7 +88,7 @@ const AllPostsScreen = () => {
             />
           ))
         ) : (
-          <p>No workers available</p>
+          <SkeletonLoader type="worker" count={2} />
         )}
       </div>
     </div>

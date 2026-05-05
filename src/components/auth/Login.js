@@ -91,7 +91,7 @@ const Login = () => {
         </div>
 
         <h2>
-          Login {role === "worker" ? "(Worker)" : "(Employer)"}
+          Login {role === "worker" ? "" : ""}
         </h2>
       </div>
 
@@ -122,7 +122,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           <Icon
-            icon={showPassword ? "mdi:eye-off-outline" : "mdi:eye-outline"}
+            icon={showPassword ? "mdi:eye-outline" : "mdi:eye-off-outline"}
             onClick={() => setShowPassword(!showPassword)}
           />
         </div>
@@ -132,6 +132,7 @@ const Login = () => {
             <input
               type="checkbox"
               checked={remember}
+              style={{accentColor:'#7f9346'}}
               onChange={() => setRemember(!remember)}
             />
             <span>Remember Me</span>

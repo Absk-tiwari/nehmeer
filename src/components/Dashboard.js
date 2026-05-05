@@ -14,12 +14,24 @@ import babysitter from "../assets/img/babyshitter.svg";
 import allrounder from "../assets/img/allrounder.svg";
 
 import NavTop from "./layouts/NavTop";
+import SkeletonLoader from "./common/SkeletonLoader";
 
 import { getNotifications } from "../redux/slices/notificationSlice";
 import { getMyJobs } from "../redux/slices/jobSlice";
 import { getProfile } from "../redux/slices/authSlice";
 
-// ✅ LAZY LOAD (Performance Boost)
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHouseChimneyUser,
+  faBaby,
+  faBroom,
+  faUserGear,
+  faUserNurse,
+  faUtensils,
+  faDog,
+  faCar,
+} from "@fortawesome/free-solid-svg-icons";
+
 const ProfileProgress = lazy(() =>
   import("./dashboard/ProfileProgress")
 );
@@ -34,7 +46,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { unreadCount } = useSelector((state) => state.notifications);
+  const { unreadCount: _unreadCount } = useSelector((state) => state.notifications);
   const { user, loading } = useSelector((state) => state.auth);
   const { total: totalJobs } = useSelector((state) => state.jobs);
 
@@ -63,11 +75,11 @@ const Dashboard = () => {
   //   }
   // }, [user, loading, navigate]);
 
-  // ✅ GLOBAL LOADER
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <p>Loading dashboard...</p>
+      <div className="dashboard-loading">
+        <SkeletonLoader type="profile" count={1} />
+        <SkeletonLoader type="card" count={4} />
       </div>
     );
   }
@@ -83,11 +95,9 @@ const Dashboard = () => {
         <img src={banner1} alt="banner" />
       </div>
 
-      {/* 👤 Profile (LAZY + FALLBACK LOADER) */}
-    {/* 👤 Profile */}
-<Suspense fallback={<p>Loading profile...</p>}>
-  {user && <ProfileProgress />}
-</Suspense>
+      <Suspense fallback={<SkeletonLoader type="profile" count={1} />}>
+        {user && <ProfileProgress />}
+      </Suspense>
 
 {/* ⚠️ PROFILE INCOMPLETE WARNING */}
 {user && (!user?.name || user?.name?.trim() === "") && (
@@ -108,7 +118,6 @@ const Dashboard = () => {
       {/* OPTIONAL INFO */}
       {console.log("TOTAL JOBS:", totalJobs)}
 
-      {/* SERVICES */}
       <section className="services">
         <h2>Housekeeping and Domestic Services</h2>
 
@@ -136,13 +145,11 @@ const Dashboard = () => {
         <img src={banner2} alt="banner" className="bannertwo" />
       </div>
 
-      {/* QUICK GUIDE */}
-      <Suspense fallback={<p style={{ padding: "10px" }}>Loading guide...</p>}>
+      <Suspense fallback={<SkeletonLoader type="card" count={1} />}>
         <QuickGuide />
       </Suspense>
 
-      {/* REVIEWS */}
-      <Suspense fallback={<p style={{ padding: "10px" }}>Loading reviews...</p>}>
+      <Suspense fallback={<SkeletonLoader type="card" count={3} />}>
         <UserReviews />
       </Suspense>
 

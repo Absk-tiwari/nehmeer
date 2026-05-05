@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
-// import { ProtectedRoute } from "./ProtectedRoute.js";
+import { ProtectedRoute } from "./ProtectedRoute.js";
+import { PublicRoute } from "./PublicRoute.js";
 
 import ForgotPassword from "../components/auth/ForgotPassword.js";
 import ResetPassword from "../components/auth/ResetPassword.js";
@@ -46,57 +47,44 @@ const ThemeRoutes = [
     path: "/",
     element: <FullLayout />,
     children: [
-
       // Default redirect
-      { path: "/", element: <Navigate to="/login" /> },
+      { path: "/", element: <Navigate to="/dashboard" /> },
 
-      // Public Routes
-      { path: "/login", element: <Login /> },
-      { path: "/register", element: <Register /> },
-      { path: "/forgot-password", element: <ForgotPassword /> },
-      { path: "/reset-password", element: <ResetPassword /> },
-      { path: "/otp", element: <OtpVerify /> },
-      {path: "/complete-profile", element:  <CompleteProfile />},
-      {path: "/dashboard", element:  <Dashboard />},
-      {path: "/notifications", element: <Notifications /> },
-      { path: "/search", exact: true, element: <Search/> },
-      { path: "/select-address", exact: true, element: <SelectAddress/> },
-      { path: "/services/:type", element: <ServiceList /> },
-      { path: "/services/:type/:id", element: <ServiceDetails /> },
-      { path: "/create-post", element: <CreatePost/> },
-      { path: "/all-posts", element: <AllPostsScreen/> },
-      { path: "/manage-workers", element: <ManageWorkers /> },
-      { path: "/manage-workers/feedback/:id", element: <FeedbackPage /> },
-      { path: "/manage-workers/stop/:id", element: <StopServicePage /> },
-      { path: "/manage-workers/profile/:id", element: <WorkerProfile /> },
-      { path: "/profile/", element: <Profile /> },
-       { path: "/complete-profile" , element: <CompleteProfile mode="create" /> },
-      { path: "/language" , element: <LanguageSelector/> },
-      { path: "/subscription" , element: <Subscription/> },
-      { path: "/terms" , element: <Terms/> },
-      { path: "/privacy-policy" , element: <PrivacyPolicy/> },
-      { path: "/license" , element: <License/> },
-      { path: "/favourites" , element: <Favourites/> },
-     { path: "/saved-location", element: <SavedLocation /> },
-     { path: "/settings", element: <Settings/> },
-     { path: "/change-password", element: <ChangePassword/> },
-     { path: "/support", element: <HelpSupport /> },
-     { path: "/custom-requirements", element: <CustomRequirements /> },
-     { path: "/custom-duties", element: <CustomDuties /> },
-     { path: "/custom-requirements", element: <CustomRequirements /> },
-      { path: "/custom-duties", element: <CustomDuties /> },
-      { path: "/custom-submit", element: <CustomSubmit /> },
-     
-      // 👉 Protected Route only for dashboard
-      // {
-      //   path: "/dashboard",
-      //   element: (
-      //     <ProtectedRoute>
-      //       <Dashboard />
-      //     </ProtectedRoute>
-      //   ),
-      // },
+      // Public Routes (Auth pages - redirect to dashboard if logged in)
+      { path: "/login", element: <PublicRoute><Login /></PublicRoute> },
+      { path: "/register", element: <PublicRoute><Register /></PublicRoute> },
+      { path: "/forgot-password", element: <PublicRoute><ForgotPassword /></PublicRoute> },
+      { path: "/reset-password", element: <PublicRoute><ResetPassword /></PublicRoute> },
+      { path: "/otp", element: <PublicRoute><OtpVerify /></PublicRoute> },
 
+      // Protected Routes (require login)
+      { path: "/complete-profile", element: <ProtectedRoute><CompleteProfile /></ProtectedRoute> },
+      { path: "/dashboard", element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
+      { path: "/notifications", element: <ProtectedRoute><Notifications /></ProtectedRoute> },
+      { path: "/search", element: <ProtectedRoute><Search /></ProtectedRoute> },
+      { path: "/select-address", element: <ProtectedRoute><SelectAddress /></ProtectedRoute> },
+      { path: "/services/:type", element: <ProtectedRoute><ServiceList /></ProtectedRoute> },
+      { path: "/services/:type/:id", element: <ProtectedRoute><ServiceDetails /></ProtectedRoute> },
+      { path: "/create-post", element: <ProtectedRoute><CreatePost /></ProtectedRoute> },
+      { path: "/all-posts", element: <ProtectedRoute><AllPostsScreen /></ProtectedRoute> },
+      { path: "/manage-workers", element: <ProtectedRoute><ManageWorkers /></ProtectedRoute> },
+      { path: "/manage-workers/feedback/:id", element: <ProtectedRoute><FeedbackPage /></ProtectedRoute> },
+      { path: "/manage-workers/stop/:id", element: <ProtectedRoute><StopServicePage /></ProtectedRoute> },
+      { path: "/manage-workers/profile/:id", element: <ProtectedRoute><WorkerProfile /></ProtectedRoute> },
+      { path: "/profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
+      { path: "/language", element: <ProtectedRoute><LanguageSelector /></ProtectedRoute> },
+      { path: "/subscription", element: <ProtectedRoute><Subscription /></ProtectedRoute> },
+      { path: "/terms", element: <ProtectedRoute><Terms /></ProtectedRoute> },
+      { path: "/privacy-policy", element: <ProtectedRoute><PrivacyPolicy /></ProtectedRoute> },
+      { path: "/license", element: <ProtectedRoute><License /></ProtectedRoute> },
+      { path: "/favourites", element: <ProtectedRoute><Favourites /></ProtectedRoute> },
+      { path: "/saved-location", element: <ProtectedRoute><SavedLocation /></ProtectedRoute> },
+      { path: "/settings", element: <ProtectedRoute><Settings /></ProtectedRoute> },
+      { path: "/change-password", element: <ProtectedRoute><ChangePassword /></ProtectedRoute> },
+      { path: "/support", element: <ProtectedRoute><HelpSupport /></ProtectedRoute> },
+      { path: "/custom-requirements", element: <ProtectedRoute><CustomRequirements /></ProtectedRoute> },
+      { path: "/custom-duties", element: <ProtectedRoute><CustomDuties /></ProtectedRoute> },
+      { path: "/custom-submit", element: <ProtectedRoute><CustomSubmit /></ProtectedRoute> },
     ],
   },
 ];

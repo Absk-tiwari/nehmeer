@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
+import SkeletonLoader from "../common/SkeletonLoader";
 
 const JoinedWorkers = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const JoinedWorkers = () => {
 
   // 🔄 LOADER
   if (loading) {
-    return <div className="loader">Loading...</div>;
+    return <SkeletonLoader type="worker" count={3} />;
   }
 
   // ❌ ERROR

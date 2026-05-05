@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
+import SkeletonLoader from "../common/SkeletonLoader";
 
 
 const WorkerProfile = () => {
@@ -25,7 +26,7 @@ const WorkerProfile = () => {
 
   // 🔄 Loader
   if (loading) {
-    return <div className="loader">Loading worker details...</div>;
+    return <SkeletonLoader type="profile" count={1} />;
   }
 
   // ❌ Error

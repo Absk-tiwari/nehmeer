@@ -108,16 +108,18 @@ const ServiceList = () => {
         )}
 
         {/* ✅ LIST */}
-        {!loading &&
-          filteredServices.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              onClick={() =>
-                navigate(`/services/${service.type}/${service.id}`)
-              }
-            />
-          ))}
+        <div className="providers-grid">
+          {!loading &&
+            filteredServices.map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                onClick={() =>
+                  navigate(`/services/${service.type}/${service.id}`)
+                }
+              />
+            ))}
+        </div>
 
         {/* FILTER BUTTON (optional future) */}
         <div className="filter-btn-wrapper">

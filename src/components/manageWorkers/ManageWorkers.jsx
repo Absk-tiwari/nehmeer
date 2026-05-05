@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense } from "react";
+import SkeletonLoader from "../common/SkeletonLoader";
 
 // 🔥 Lazy load (performance boost)
 const JoinedWorkers = lazy(() => import("./JoinedWorkers"));
@@ -39,7 +40,7 @@ const ManageWorkers = () => {
       </div>
 
       {/* 🔄 LAZY LOADING */}
-      <Suspense fallback={<div className="loader">Loading...</div>}>
+      <Suspense fallback={<SkeletonLoader type="worker" count={3} />}>
         {activeTab === "joined" && <JoinedWorkers />}
         {activeTab === "history" && <WorkerHistory />}
       </Suspense>
