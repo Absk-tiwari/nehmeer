@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
 
+// ⚠️ WARNING: /posts endpoints are NOT in the backend API list
+// These may need to be replaced with /jobs APIs or backend needs to add /posts routes
+
 // 🔥 GET POSTS
 export const getMyPosts = createAsyncThunk(
   "posts/getMyPosts",

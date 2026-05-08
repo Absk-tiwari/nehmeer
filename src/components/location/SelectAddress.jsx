@@ -1,175 +1,342 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faLocationDot,
+  faMagnifyingGlass,
+  faLocationCrosshairs,
+  faSpinner
+} from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 import MapSelector from "./MapSelector";
 
 const SelectAddress = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchTimeoutRef = useRef(null);
 
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [position, setPosition] = useState(null);
+  const { lat, lng, viewOnly, address: passedAddress, returnTo, onSelectAction } = location.state || {};
 
-  // 👇 THIS IS YOUR FINAL DATA OBJECT
-  const [selectedData, setSelectedData] = useState(null);
+  const [search, setSearch] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [address, setAddress] = useState({ fullAddress: "" });
+  const [selectedCoords, setSelectedCoords] = useState(null);
+  const [mapCenter, setMapCenter] = useState(null);
 
-  // SEARCH ADDRESS
-  const handleSearch = async (value) => {
-    setQuery(value);
-    if (value.length < 3) {
-      setResults([]);
-      return;
+  useEffect(() => {
+    if (lat && lng) {
+      setMapCenter([lat, lng]);
+      setSelectedCoords({ lat, lng });
+      if (passedAddress) {
+        setAddress({ fullAddress: passedAddress });
+      }
+    }
+  }, [lat, lng, passedAddress]);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
 
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${value}`
-    );
-    const data = await res.json();
-    setResults(data);
+    if (search.length > 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        searchLocation(search);
+      }, 400);
+    } else {
+      setSuggestions([]);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [search]);
+
+  const searchLocation = async (query) => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}`,
+        { headers: { "User-Agent": "nehmeer-web" } }
+      );
+
+      if (!res.ok) throw new Error("Search failed");
+
+      const data = await res.json();
+      setSuggestions(data);
+    } catch (e) {
+      console.error(e);
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // REVERSE GEO (lat,lng → address)
-  const fetchAddress = async (lat, lng) => {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-    );
-    const data = await res.json();
-
-    setSelectedData({
-      address: data.display_name,
-      lat,
-      lng,
-    });
-
-    setQuery(data.display_name);
-    setResults([]);
-  };
-
-  // SEARCH RESULT CLICK
-  const selectResult = (item) => {
+  const handleSelectLocation = async (item) => {
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lon);
 
-    setPosition([lat, lng]);
-    setSelectedData({
-      address: item.display_name,
-      lat,
-      lng,
-    });
+    setMapCenter([lat, lng]);
+    setSelectedCoords({ lat, lng });
+    setSearch(item.display_name);
+    setSuggestions([]);
 
-    setQuery(item.display_name);
-    setResults([]);
+    // Fetch full address details to get city
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        { headers: { "User-Agent": "nehmeer-web" } }
+      );
+      const data = await res.json();
+      const addr = data.address || {};
+      const city = addr.city || addr.town || addr.village || addr.county || addr.state || "";
+
+      setAddress({
+        fullAddress: item.display_name,
+        city,
+        state: addr.state || "",
+        ...addr,
+        latitude: lat,
+        longitude: lng,
+      });
+    } catch (e) {
+      setAddress({
+        fullAddress: item.display_name,
+        city: "",
+        latitude: lat,
+        longitude: lng,
+      });
+    }
   };
 
-  // CURRENT LOCATION
+  const handleMapClick = async (latlng) => {
+    if (viewOnly) return;
+
+    setLoading(true);
+    const { lat, lng } = latlng;
+    setSelectedCoords({ lat, lng });
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        { headers: { "User-Agent": "nehmeer-web" } }
+      );
+      const data = await res.json();
+
+      if (data.display_name) {
+        const addr = data.address || {};
+        const city = addr.city || addr.town || addr.village || addr.county || addr.state || "";
+
+        setAddress({
+          fullAddress: data.display_name,
+          city,
+          state: addr.state || "",
+          ...addr,
+          latitude: lat,
+          longitude: lng,
+        });
+      } else {
+        setAddress({
+          fullAddress: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          city: "",
+          latitude: lat,
+          longitude: lng,
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      setAddress({
+        fullAddress: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        city: "",
+        latitude: lat,
+        longitude: lng,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLoading(true);
+
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setPosition([lat, lng]);
-        fetchAddress(lat, lng);
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setMapCenter([latitude, longitude]);
+        setSelectedCoords({ lat: latitude, lng: longitude });
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            { headers: { "User-Agent": "nehmeer-web" } }
+          );
+          const data = await res.json();
+
+          if (data.display_name) {
+            const addr = data.address || {};
+            const city = addr.city || addr.town || addr.village || addr.county || addr.state || "";
+
+            setAddress({
+              fullAddress: data.display_name,
+              city,
+              state: addr.state || "",
+              ...addr,
+              latitude,
+              longitude,
+            });
+          } else {
+            setAddress({
+              fullAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+              city: "",
+              latitude,
+              longitude,
+            });
+          }
+        } catch (e) {
+          console.error(e);
+          setAddress({
+            fullAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+            city: "",
+            latitude,
+            longitude,
+          });
+        } finally {
+          setLoading(false);
+        }
       },
-      () => alert("Location permission denied")
+      (error) => {
+        setLoading(false);
+        alert("Unable to get your location. Please enable location access.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
-  // SAVE ADDRESS (🔥 THIS IS WHAT YOU NEED FOR BACKEND)
-  const handleSaveAddress = () => {
-    console.log("Selected Address Data:", selectedData);
+  const handleConfirm = () => {
+    if (!selectedCoords) {
+      alert("Please select a location first");
+      return;
+    }
 
-    /*
-      🔥 FUTURE BACKEND API EXAMPLE 🔥
+    const addressData = {
+      lat: selectedCoords.lat,
+      lng: selectedCoords.lng,
+      address,
+    };
 
-      axios.post("/api/save-address", selectedData)
+    console.log("Selected Address:", addressData);
 
-      selectedData = {
-        address: "...",
-        lat: 23.67,
-        lng: 87.68
-      }
-    */
-
-    navigate("/dashboard");
+    if (returnTo) {
+      navigate(returnTo, { state: { selectedAddress: addressData, onSelectAction } });
+    } else {
+      navigate(-1);
+    }
   };
 
   return (
-    <div className="address-page">
-      {/* HEADER */}
-      <div className="address-header">
-        <span className="back-btn" onClick={() => navigate(-1)}>←</span>
-        <h3>Select Address</h3>
-      </div>
+    <AppLayout header={<CommonHeader back title="Select Location" />}>
+      <div className="select-address-container">
 
-      {/* SEARCH */}
-      <div className="address-search">
-        <span className="search-icon">🔍</span>
-        <input
-          type="text"
-          placeholder="Search for area, locality.."
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-      </div>
-
-      {/* SEARCH RESULTS */}
-      {results.length > 0 && (
-        <div className="search-results">
-          {results.map((item, i) => (
-            <div
-              key={i}
-              className="search-item"
-              onClick={() => selectResult(item)}
-            >
-              📍 {item.display_name}
+        {!viewOnly && (
+          <div className="search-container">
+            <div className="search-box">
+              <FontAwesomeIcon icon={faMagnifyingGlass} className="search-icon" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search area..."
+                className="search-input"
+              />
             </div>
-          ))}
+
+            {search.length > 2 && (
+              <div className="suggestions-container">
+                {loading ? (
+                  <div className="searching-container">
+                    <FontAwesomeIcon icon={faSpinner} spin className="searching-spinner" />
+                    <span className="searching-text">Searching...</span>
+                  </div>
+                ) : suggestions.length > 0 ? (
+                  <div className="suggestions-list">
+                    {suggestions.map((item, i) => (
+                      <div
+                        key={i}
+                        className="suggestion-item"
+                        onClick={() => handleSelectLocation(item)}
+                      >
+                        <FontAwesomeIcon icon={faLocationDot} className="suggestion-icon" />
+                        <span className="suggestion-text">{item.display_name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-results">No locations found</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="map-container">
+          <MapSelector
+            center={mapCenter}
+            selectedCoords={selectedCoords}
+            onMapClick={handleMapClick}
+          />
+
+          {!viewOnly && (
+            <button className="current-location-btn" onClick={useCurrentLocation}>
+              <FontAwesomeIcon icon={faLocationCrosshairs} className="current-location-icon" />
+              <span>Use Current Location</span>
+            </button>
+          )}
         </div>
-      )}
 
-      {/* MAP */}
-      <div className="map-wrapper">
-        <MapSelector
-          position={position}
-          onMapClick={(latlng) => {
-            setPosition([latlng.lat, latlng.lng]);
-            fetchAddress(latlng.lat, latlng.lng);
-          }}
-        />
-
-        <button className="current-location-btn" onClick={useCurrentLocation}>
-          ⦿ Use Current location
-        </button>
-      </div>
-
-      {/* ADDRESS CARD */}
-      {selectedData && (
-        <div className="address-card">
-          <div className="address-row">
-            <span className="pin">📍</span>
-            <p>{selectedData.address}</p>
-            <span className="arrow">›</span>
+        <div className="floating-card">
+          <div className="selected-location-details">
+            <div className="selected-icon-box">
+              <FontAwesomeIcon
+                icon={faLocationDot}
+                className={`selected-icon ${address.fullAddress ? 'active' : ''}`}
+              />
+            </div>
+            <div className="selected-info">
+              <h4 className="selected-city">
+                {address.city || address.state || (address.fullAddress ? "Selected Location" : "No location selected")}
+              </h4>
+              <p className="selected-address">
+                {address.fullAddress || "Tap on the map or search to select a location"}
+              </p>
+            </div>
           </div>
 
-          <div className="address-warning">
-            <p>This address may be far from your current location</p>
-            <span className="use-current" onClick={useCurrentLocation}>
-              Use Current location
-            </span>
-          </div>
+          <button
+            className={`confirm-btn ${!selectedCoords ? 'disabled' : ''}`}
+            onClick={handleConfirm}
+            disabled={!selectedCoords || loading}
+          >
+            {loading ? (
+              <>
+                <FontAwesomeIcon icon={faSpinner} spin />
+                <span>Loading...</span>
+              </>
+            ) : (
+              <span>{viewOnly ? "Viewing Location" : "Confirm Location"}</span>
+            )}
+          </button>
         </div>
-      )}
 
-      {/* SAVE BUTTON */}
-      <div className="address-footer">
-        <button
-          className="save-address-btn"
-          disabled={!selectedData}
-          onClick={handleSaveAddress}
-        >
-          Save address
-        </button>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

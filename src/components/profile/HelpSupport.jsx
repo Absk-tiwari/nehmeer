@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaperPlane, faPaperclip } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const HelpSupport = () => {
   const navigate = useNavigate();
@@ -47,13 +51,8 @@ const HelpSupport = () => {
   };
 
   return (
-    <div className="chat-page">
-
-      {/* HEADER */}
-      <div className="chat-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h3>Help and support</h3>
-      </div>
+    <AppLayout header={<CommonHeader back title="Help & Support" />}>
+      <div className="chat-page">
 
       {/* CHAT AREA */}
       <div className="chat-body">
@@ -88,13 +87,14 @@ const HelpSupport = () => {
         />
 
         <button className="send-btn" onClick={sendMessage}>
-          ➤
+          <FontAwesomeIcon icon={faPaperPlane} />
         </button>
 
-        <button className="attach-btn">📎</button>
+        <button className="attach-btn"><FontAwesomeIcon icon={faPaperclip} /></button>
 
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

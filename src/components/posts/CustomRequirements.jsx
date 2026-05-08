@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { createPost } from "../../redux/slices/postSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 
 const CustomRequirements = () => {
@@ -77,13 +81,8 @@ const CustomRequirements = () => {
   };
 
   return (
-    <div className="requirement-page">
-
-      {/* HEADER */}
-      <div className="req-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h3>Custom Requirements</h3>
-      </div>
+    <AppLayout header={<CommonHeader back title="Custom Requirements" />}>
+      <div className="requirement-page">
 
       {/* STEP TABS */}
       <div className="req-tabs">
@@ -194,7 +193,7 @@ const CustomRequirements = () => {
           </div>
 
           <button className="next-btn" onClick={() => setStep(2)}>
-            Next →
+            Next <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
       )}
@@ -223,7 +222,7 @@ const CustomRequirements = () => {
           />
 
           <button className="next-btn" onClick={() => setStep(3)}>
-            Next →
+            Next <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
       )}
@@ -268,7 +267,8 @@ const CustomRequirements = () => {
         </div>
       )}
 
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

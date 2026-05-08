@@ -1,4 +1,6 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
 
 const StarRating = ({ value, onChange }) => {
   return (
@@ -9,7 +11,7 @@ const StarRating = ({ value, onChange }) => {
           onClick={() => onChange(star)}
           className={value >= star ? "fb-star active" : "fb-star"}
         >
-          ★
+          <FontAwesomeIcon icon={faStar} />
         </span>
       ))}
     </div>

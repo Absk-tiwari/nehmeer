@@ -1,184 +1,221 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faLocationDot,
+  faTrash,
+  faSpinner,
+  faCloudArrowDown,
+  faRotateRight,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  getLocations,
   addLocation,
   deleteLocation,
-  setDefaultLocation,
 } from "../../redux/slices/locationSlice";
-
-import GooglePlacesAutocomplete from "react-google-places-autocomplete";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const SavedLocation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
-  const { locations, defaultLocationId } = useSelector(
-    (state) => state.locations
-  );
+  const { choosing, onSelect, goTo } = location.state || {};
 
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState(null);
+  const { locations, loading, error } = useSelector((state) => state.locations);
 
-  // 📍 AUTO LOCATION (browser)
-  const detectCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
+  const [selectedLocation, setSelectedLocation] = useState({ address: "" });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [adding, setAdding] = useState(false);
 
-        const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_API_KEY`;
+  useEffect(() => {
+    dispatch(getLocations());
+  }, [dispatch]);
 
-        fetch(geoUrl)
-          .then((res) => res.json())
-          .then((data) => {
-            const formatted =
-              data.results?.[0]?.formatted_address;
-
-            setAddress({
-              label: formatted,
-              value: formatted,
-            });
-          });
+  const handleAddNew = () => {
+    navigate("/select-address", {
+      state: {
+        returnTo: "/saved-location",
+        onSelectAction: "add",
       },
-      (err) => {
-        console.log(err);
-      }
-    );
+    });
   };
 
-  const handleAdd = () => {
-    if (!name || !address?.label) return;
+  useEffect(() => {
+    if (location.state?.selectedAddress && location.state?.onSelectAction === "add") {
+      const { lat, lng, address } = location.state.selectedAddress;
+      setAdding(true);
+      dispatch(
+        addLocation({
+          lat,
+          lng,
+          address,
+        })
+      ).then(() => {
+        setAdding(false);
+        navigate("/saved-location", { replace: true, state: { choosing } });
+      });
+    }
+  }, [location.state?.selectedAddress]);
 
-    dispatch(
-      addLocation({
-        name,
-        address: address.label,
-      })
-    );
+  const handleSelectLocation = (item) => {
+    if (choosing) {
+      setSelectedLocation(item);
+    }
+  };
 
-    setName("");
-    setAddress(null);
+  const handleDeleteClick = (e, id) => {
+    e.stopPropagation();
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await dispatch(deleteLocation(deleteId));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+      setDeleteId(null);
+    }
+  };
+
+  const handleConfirmLocation = () => {
+    if (onSelect) {
+      onSelect(selectedLocation);
+    }
+    if (goTo) {
+      navigate(goTo);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleRetry = () => {
+    dispatch(getLocations());
   };
 
   return (
-    <div className="saved-location-page">
+    <AppLayout header={<CommonHeader back title="Saved Locations" />}>
+      <div className="saved-location-container">
 
-      {/* HEADER */}
-      <div className="saved-location-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h2>Saved Location</h2>
-      </div>
-
-      {/* ADD LOCATION */}
-      <div style={{
-        padding: 15,
-        border: "1px solid #eee",
-        borderRadius: 10,
-        margin: 10,
-      }}>
-
-        <h4>Add Location</h4>
-
-        {/* NAME */}
-        <input
-          placeholder="Home / Office"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ width: "100%", padding: 8, marginBottom: 8 }}
-        />
-
-        {/* 🧠 GOOGLE AUTOCOMPLETE */}
-        <GooglePlacesAutocomplete
-          apiKey="YOUR_GOOGLE_API_KEY"
-          selectProps={{
-            value: address,
-            onChange: setAddress,
-          }}
-        />
-
-        {/* 📍 CURRENT LOCATION */}
-        <button
-          onClick={detectCurrentLocation}
-          style={{
-            marginTop: 8,
-            padding: 8,
-            width: "100%",
-          }}
-        >
-          📍 Use Current Location
-        </button>
-
-        {/* SAVE */}
-        <button
-          onClick={handleAdd}
-          style={{
-            marginTop: 10,
-            width: "100%",
-            padding: 10,
-            background: "black",
-            color: "white",
-          }}
-        >
-          Save Location
-        </button>
-      </div>
-
-      {/* LIST */}
-      <div className="saved-location-list">
-
-        {locations.map((loc) => (
-          <div
-            key={loc.id}
-            style={{
-              padding: 12,
-              borderBottom: "1px solid #eee",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-
-            <div>
-              <h4>
-                {loc.name}
-                {defaultLocationId === loc.id && (
-                  <span style={{ color: "green", marginLeft: 6 }}>
-                    (Default)
-                  </span>
-                )}
-              </h4>
-              <p style={{ fontSize: 12 }}>{loc.address}</p>
-            </div>
-
-            <div style={{ display: "flex", gap: 8 }}>
-
-              {/* DEFAULT BUTTON */}
-              <button
-                onClick={() =>
-                  dispatch(setDefaultLocation(loc.id))
-                }
-              >
-                🏠
-              </button>
-
-              {/* DELETE */}
-              <button
-                onClick={() =>
-                  dispatch(deleteLocation(loc.id))
-                }
-                style={{ color: "red" }}
-              >
-                ✕
-              </button>
-
-            </div>
-
+        {loading || adding ? (
+          <div className="saved-location-loading">
+            <div className="skeleton-card"></div>
+            <div className="skeleton-card"></div>
+            <div className="skeleton-card"></div>
           </div>
-        ))}
+        ) : error ? (
+          <div className="saved-location-error">
+            <FontAwesomeIcon icon={faCloudArrowDown} className="error-icon" />
+            <h3>Failed to load locations</h3>
+            <p>Please check your internet connection</p>
+            <button className="retry-btn" onClick={handleRetry}>
+              <FontAwesomeIcon icon={faRotateRight} />
+              <span>Retry</span>
+            </button>
+          </div>
+        ) : (
+          <div className="saved-location-list">
+            <div className="add-new-btn" onClick={handleAddNew}>
+              + Add New
+            </div>
+
+            {locations.length > 0 ? (
+              locations.map((item) => (
+                <div
+                  key={item.id}
+                  className={`location-card ${choosing && selectedLocation?.id === item.id ? 'selected' : ''}`}
+                  onClick={() => handleSelectLocation(item)}
+                >
+                  <div className="location-icon-box">
+                    <FontAwesomeIcon icon={faLocationDot} className="location-icon" />
+                  </div>
+
+                  <div className="location-content">
+                    <h4 className="location-name">{item.city || item.name || "Location"}</h4>
+                    <p className="location-address">{item.address}</p>
+                  </div>
+
+                  <button
+                    className="delete-btn"
+                    onClick={(e) => handleDeleteClick(e, item.id)}
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="no-locations">
+                <FontAwesomeIcon icon={faLocationDot} className="no-locations-icon" />
+                <h3>No locations saved!</h3>
+                <p>Tap "Add New" to save a location</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {choosing && (
+          <div className="floating-card">
+            <div className="selected-location-details">
+              <div className="selected-icon-box">
+                <FontAwesomeIcon
+                  icon={faLocationDot}
+                  className={`selected-icon ${selectedLocation.address ? 'active' : ''}`}
+                />
+              </div>
+              <div className="selected-info">
+                <h4 className="selected-city">
+                  {selectedLocation.city || selectedLocation.name || (selectedLocation.address ? "Selected Location" : "No location selected")}
+                </h4>
+                <p className="selected-address">
+                  {selectedLocation.address || "Tap on a location above to select"}
+                </p>
+              </div>
+            </div>
+            <button
+              className={`confirm-btn ${!selectedLocation.address ? 'disabled' : ''}`}
+              onClick={handleConfirmLocation}
+              disabled={!selectedLocation.address}
+            >
+              Confirm Location
+            </button>
+          </div>
+        )}
+
+        {showDeleteModal && (
+          <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+            <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-icon warning">
+                <FontAwesomeIcon icon={faTrash} />
+              </div>
+              <h3>Remove Location</h3>
+              <p>Are you sure you want to remove this location?</p>
+              <div className="modal-buttons">
+                <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>
+                  Cancel
+                </button>
+                <button className="confirm-btn danger" onClick={handleConfirmDelete} disabled={deleting}>
+                  {deleting ? (
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  ) : (
+                    "Remove"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
-
-    </div>
+    </AppLayout>
   );
 };
 

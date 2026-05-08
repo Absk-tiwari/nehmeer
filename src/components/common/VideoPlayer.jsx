@@ -74,7 +74,9 @@ const VideoPlayer = ({
           file: {
             attributes: {
               controlsList: "nodownload",
+              playsInline: true,
             },
+            forceVideo: true,
           },
         }}
       />

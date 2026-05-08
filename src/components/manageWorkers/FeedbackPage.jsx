@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StarRating from "../../components/StarRating";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 
 const FeedbackPage = () => {
@@ -32,13 +34,10 @@ const FeedbackPage = () => {
   };
 
   return (
-    <div className="fb-page">
-      <div className="fb-card">
-
-        <div className="fb-header">
-          <h2>Share your experience</h2>
-          <span className="fb-close" onClick={() => navigate(-1)}>✕</span>
-        </div>
+    <AppLayout header={<CommonHeader back title="Feedback" />}>
+      <div className="fb-page">
+        <div className="fb-card">
+          <h2 className="fb-title">Share your experience</h2>
 
         {/* Overall Rating */}
         <StarRating
@@ -103,8 +102,9 @@ const FeedbackPage = () => {
           Submit
         </button>
 
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

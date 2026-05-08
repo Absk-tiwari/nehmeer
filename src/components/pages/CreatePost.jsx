@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { createPost, resetCreatePost } from "../../redux/slices/postSlice";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const CreatePost = () => {
   const dispatch = useDispatch();
@@ -79,17 +81,11 @@ const CreatePost = () => {
   }, [createError]);
 
   return (
-    <div className="create-post-wrapper">
-      <div className="create-post-container">
+    <AppLayout header={<CommonHeader back title="Create Post" />}>
+      <div className="create-post-wrapper">
+        <div className="create-post-container">
 
-        <div className="page-header">
-          <span className="back-arrow" onClick={() => navigate(-1)}>
-            ←
-          </span>
-          <span>Create a new post</span>
-        </div>
-
-        <form className="form" onSubmit={handleSubmit}>
+          <form className="form" onSubmit={handleSubmit}>
 
           {/* Looking For */}
           <div className="form-group">
@@ -235,9 +231,10 @@ const CreatePost = () => {
             {createLoading ? "Posting..." : "Post Your Requirement"}
           </button>
 
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

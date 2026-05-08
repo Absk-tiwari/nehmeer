@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute.js";
 import { PublicRoute } from "./PublicRoute.js";
+import { SemiProtectedRoute } from "./SemiProtectedRoute.js";
 
 import ForgotPassword from "../components/auth/ForgotPassword.js";
 import ResetPassword from "../components/auth/ResetPassword.js";
@@ -9,6 +10,8 @@ import OtpVerify from "../components/auth/OtpVerify.js";
 import CompleteProfile from "../components/CompleteProfile.js";
 import Notifications from "../components/dashboard/Notifications.jsx";
 import Search from "../components/search/Search.jsx";
+import SearchResults from "../components/search/SearchResults.jsx";
+import SearchWorkerProfile from "../components/search/SearchWorkerProfile.jsx";
 import SelectAddress from "../components/location/SelectAddress.jsx";
 import ServiceList from "../components/pages/ServiceList.jsx";
 import ServiceDetails from "../components/pages/ServiceDetails.jsx";
@@ -32,6 +35,8 @@ import HelpSupport from "../components/profile/HelpSupport.jsx";
 import CustomRequirements from "../components/posts/CustomRequirements.jsx";
 import CustomDuties from "../components/pages/CustomDuties.jsx";
 import CustomSubmit from "../components/pages/CustomSubmit.jsx";
+import PostDetails from "../components/posts/PostDetails.jsx";
+import About from "../components/pages/About.jsx";
 
 const FullLayout = lazy(() => import("../components/layouts/FullLayout.js"));
 
@@ -57,31 +62,40 @@ const ThemeRoutes = [
       { path: "/reset-password", element: <PublicRoute><ResetPassword /></PublicRoute> },
       { path: "/otp", element: <PublicRoute><OtpVerify /></PublicRoute> },
 
-      // Protected Routes (require login)
+      // Public Routes (accessible without login)
+      { path: "/dashboard", element: <Dashboard /> },
+      { path: "/search", element: <Search /> },
+      { path: "/search-results", element: <SearchResults /> },
+      { path: "/worker-profile/:id", element: <SearchWorkerProfile /> },
+      { path: "/services/:type", element: <ServiceList /> },
+      { path: "/services/:type/:id", element: <ServiceDetails /> },
+      { path: "/terms", element: <Terms /> },
+      { path: "/privacy-policy", element: <PrivacyPolicy /> },
+      { path: "/license", element: <License /> },
+      { path: "/about", element: <About /> },
+
+      // Semi-Protected Routes (show login prompt if not logged in)
+      { path: "/profile", element: <SemiProtectedRoute><Profile /></SemiProtectedRoute> },
+      { path: "/notifications", element: <SemiProtectedRoute><Notifications /></SemiProtectedRoute> },
+      { path: "/all-posts", element: <SemiProtectedRoute><AllPostsScreen /></SemiProtectedRoute> },
+      { path: "/post/:id", element: <SemiProtectedRoute><PostDetails /></SemiProtectedRoute> },
+      { path: "/post/:id/applicants", element: <SemiProtectedRoute><PostDetails /></SemiProtectedRoute> },
+      { path: "/manage-workers", element: <SemiProtectedRoute><ManageWorkers /></SemiProtectedRoute> },
+      { path: "/manage-workers/feedback/:id", element: <SemiProtectedRoute><FeedbackPage /></SemiProtectedRoute> },
+      { path: "/manage-workers/stop/:id", element: <SemiProtectedRoute><StopServicePage /></SemiProtectedRoute> },
+      { path: "/manage-workers/profile/:id", element: <SemiProtectedRoute><WorkerProfile /></SemiProtectedRoute> },
+      { path: "/language", element: <SemiProtectedRoute><LanguageSelector /></SemiProtectedRoute> },
+      { path: "/subscription", element: <SemiProtectedRoute><Subscription /></SemiProtectedRoute> },
+      { path: "/favourites", element: <SemiProtectedRoute><Favourites /></SemiProtectedRoute> },
+      { path: "/saved-location", element: <SemiProtectedRoute><SavedLocation /></SemiProtectedRoute> },
+      { path: "/settings", element: <SemiProtectedRoute><Settings /></SemiProtectedRoute> },
+      { path: "/change-password", element: <SemiProtectedRoute><ChangePassword /></SemiProtectedRoute> },
+      { path: "/support", element: <SemiProtectedRoute><HelpSupport /></SemiProtectedRoute> },
+
+      // Protected Routes (require login - redirect to login)
       { path: "/complete-profile", element: <ProtectedRoute><CompleteProfile /></ProtectedRoute> },
-      { path: "/dashboard", element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
-      { path: "/notifications", element: <ProtectedRoute><Notifications /></ProtectedRoute> },
-      { path: "/search", element: <ProtectedRoute><Search /></ProtectedRoute> },
       { path: "/select-address", element: <ProtectedRoute><SelectAddress /></ProtectedRoute> },
-      { path: "/services/:type", element: <ProtectedRoute><ServiceList /></ProtectedRoute> },
-      { path: "/services/:type/:id", element: <ProtectedRoute><ServiceDetails /></ProtectedRoute> },
       { path: "/create-post", element: <ProtectedRoute><CreatePost /></ProtectedRoute> },
-      { path: "/all-posts", element: <ProtectedRoute><AllPostsScreen /></ProtectedRoute> },
-      { path: "/manage-workers", element: <ProtectedRoute><ManageWorkers /></ProtectedRoute> },
-      { path: "/manage-workers/feedback/:id", element: <ProtectedRoute><FeedbackPage /></ProtectedRoute> },
-      { path: "/manage-workers/stop/:id", element: <ProtectedRoute><StopServicePage /></ProtectedRoute> },
-      { path: "/manage-workers/profile/:id", element: <ProtectedRoute><WorkerProfile /></ProtectedRoute> },
-      { path: "/profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
-      { path: "/language", element: <ProtectedRoute><LanguageSelector /></ProtectedRoute> },
-      { path: "/subscription", element: <ProtectedRoute><Subscription /></ProtectedRoute> },
-      { path: "/terms", element: <ProtectedRoute><Terms /></ProtectedRoute> },
-      { path: "/privacy-policy", element: <ProtectedRoute><PrivacyPolicy /></ProtectedRoute> },
-      { path: "/license", element: <ProtectedRoute><License /></ProtectedRoute> },
-      { path: "/favourites", element: <ProtectedRoute><Favourites /></ProtectedRoute> },
-      { path: "/saved-location", element: <ProtectedRoute><SavedLocation /></ProtectedRoute> },
-      { path: "/settings", element: <ProtectedRoute><Settings /></ProtectedRoute> },
-      { path: "/change-password", element: <ProtectedRoute><ChangePassword /></ProtectedRoute> },
-      { path: "/support", element: <ProtectedRoute><HelpSupport /></ProtectedRoute> },
       { path: "/custom-requirements", element: <ProtectedRoute><CustomRequirements /></ProtectedRoute> },
       { path: "/custom-duties", element: <ProtectedRoute><CustomDuties /></ProtectedRoute> },
       { path: "/custom-submit", element: <ProtectedRoute><CustomSubmit /></ProtectedRoute> },

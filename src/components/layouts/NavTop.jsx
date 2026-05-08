@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faSearch, faBell } from "@fortawesome/free-solid-svg-icons";
 
-const NavTop = () => {
+const NavTop = ({ onMenuClick }) => {
   const navigate = useNavigate();
 
   const { unreadCount } = useSelector(
@@ -14,7 +14,7 @@ const NavTop = () => {
   return (
     <header className="top-header mobile-only">
       <div className="left">
-        <span className="menu">
+        <span className="menu" onClick={onMenuClick}>
           <FontAwesomeIcon icon={faBars} />
         </span>
         <img src={navlogo} alt="ALLINEUP" className="header-logo" />

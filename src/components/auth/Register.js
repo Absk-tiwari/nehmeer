@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../redux/slices/authSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 const Signup = () => {
   const Navigate = useNavigate();
@@ -68,15 +70,15 @@ const Signup = () => {
       if (registerUser.fulfilled.match(result)) {
         Swal.fire({
           toast: true,
-          position: "top-end",
+          position: "top",
           icon: "success",
-          title: `OTP Sent (${role}) 📱`,
+          title: "Registration Successful!",
           showConfirmButton: false,
           timer: 2000,
         });
 
         setTimeout(() => {
-          Navigate("/otp");
+          Navigate("/login");
         }, 2000);
       } else {
         Swal.fire({
@@ -179,7 +181,7 @@ const Signup = () => {
             onClick={handleSignup}
             disabled={loading}
           >
-            {loading ? "Sending OTP..." : "Send OTP →"}
+            {loading ? "Signing Up..." : <>Sign Up <FontAwesomeIcon icon={faArrowRight} /></>}
           </button>
         </div>
       </div>

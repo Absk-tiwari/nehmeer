@@ -9,7 +9,7 @@ const FullLayout = () => {
   const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password", "/otp"];
   const isAuthPage = authRoutes.includes(location.pathname);
 
-  const showNav = token && !isAuthPage;
+  const showNav = !isAuthPage;
 
   return (
     <div className={`layout-wrapper ${!showNav ? 'no-nav' : ''}`}>

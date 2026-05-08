@@ -4,6 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ServiceCard from "../service/ServiceCard";
 import { getMyJobs } from "../../redux/slices/jobSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLocationDot, faBars, faChevronDown, faFilter } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 
 const ServiceList = () => {
@@ -12,15 +16,18 @@ const ServiceList = () => {
   const dispatch = useDispatch();
 
   const { list, loading } = useSelector((state) => state.jobs);
+  const { role } = useSelector((state) => state.auth);
 
   // 🔥 STATE
   const [sortType, setSortType] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
 
-  // 🔄 FETCH DATA
+  // 🔄 FETCH DATA (only for employers)
   useEffect(() => {
-    dispatch(getMyJobs());
-  }, [dispatch]);
+    if (role && role === "employer") {
+      dispatch(getMyJobs());
+    }
+  }, [dispatch, role]);
 
   // ✅ FILTER BY TYPE
   let filteredServices = list.filter(
@@ -49,37 +56,13 @@ const ServiceList = () => {
   }
 
   return (
-    <div className="app-shell">
+    <AppLayout header={<CommonHeader back title={`${type} Near You`} />}>
       <div className="service-list">
 
-        {/* HEADER */}
-        <div className="service-header">
-
-          <div className="header-top">
-            <button
-              className="back-btn"
-              onClick={() => navigate(-1)}
-            >
-              ←
-            </button>
-
-            <h2>{type} Near You</h2>
-
-            {/* 🔥 SORT BUTTON */}
-            <button
-              className="sort-btn"
-              onClick={() =>
-                setSortType(sortType === "latest" ? "oldest" : "latest")
-              }
-            >
-              ☰ Sort by ({sortType || "none"})
-            </button>
-          </div>
-
-          {/* 🔥 LOCATION FILTER */}
+        {/* FILTER ROW */}
+        <div className="service-filter-row">
           <div className="location-row">
-            <span className="location-icon">📍</span>
-
+            <span className="location-icon"><FontAwesomeIcon icon={faLocationDot} /></span>
             <input
               type="text"
               placeholder="Enter location..."
@@ -89,12 +72,20 @@ const ServiceList = () => {
                 border: "none",
                 outline: "none",
                 background: "transparent",
+                flex: 1,
               }}
             />
-
-            <span className="sl-dropdown">⌄</span>
+            <span className="sl-dropdown"><FontAwesomeIcon icon={faChevronDown} /></span>
           </div>
 
+          <button
+            className="sort-btn"
+            onClick={() =>
+              setSortType(sortType === "latest" ? "oldest" : "latest")
+            }
+          >
+            <FontAwesomeIcon icon={faBars} /> Sort by ({sortType || "none"})
+          </button>
         </div>
 
         {/* 🔄 LOADER */}
@@ -124,12 +115,12 @@ const ServiceList = () => {
         {/* FILTER BUTTON (optional future) */}
         <div className="filter-btn-wrapper">
           <button className="filter-btn">
-            ☰ Filter by
+            <FontAwesomeIcon icon={faFilter} /> Filter by
           </button>
         </div>
 
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

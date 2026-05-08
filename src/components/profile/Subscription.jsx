@@ -3,8 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPlans,
-  getActivePlan,
+  getMySubscription,
 } from "../../redux/slices/subscriptionSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faCheck, faGem, faFire } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const Subscription = () => {
   const navigate = useNavigate();
@@ -16,7 +20,7 @@ const Subscription = () => {
 
   useEffect(() => {
     dispatch(getPlans());
-    dispatch(getActivePlan());
+    dispatch(getMySubscription());
   }, [dispatch]);
 
   // 🔥 fallback plans (so UI never breaks)
@@ -62,13 +66,8 @@ const Subscription = () => {
     plans && plans.length > 0 ? plans : fallbackPlans;
 
   return (
-    <div className="subscription-page">
-
-      {/* HEADER */}
-      <div className="subscription-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h2>My Subscription</h2>
-      </div>
+    <AppLayout header={<CommonHeader back title="My Subscription" />}>
+      <div className="subscription-page">
 
       {/* CURRENT PLAN */}
       <div className="my-plan-section">
@@ -76,13 +75,13 @@ const Subscription = () => {
 
         {activePlan ? (
           <div className="my-plan-card">
-            <div className="plan-icon">👤</div>
+            <div className="plan-icon"><FontAwesomeIcon icon={faUser} /></div>
 
             <div className="plan-info">
               <h4>{activePlan.name}</h4>
 
               {activePlan.features?.map((f, i) => (
-                <p key={i}>✓ {f}</p>
+                <p key={i}><FontAwesomeIcon icon={faCheck} /> {f}</p>
               ))}
 
               <button className="manage-plan-btn">
@@ -109,7 +108,7 @@ const Subscription = () => {
             safePlans.map((plan, index) => (
               <div key={plan.id} className={`plan-card plan-${index}`}>
 
-                <div className="plan-icon">💎</div>
+                <div className="plan-icon"><FontAwesomeIcon icon={faGem} /></div>
 
                 <h4>{plan.name}</h4>
 
@@ -117,7 +116,7 @@ const Subscription = () => {
 
                 <div className="plan-features">
                   {plan.features?.map((f, i) => (
-                    <p key={i}>✓ {f}</p>
+                    <p key={i}><FontAwesomeIcon icon={faCheck} /> {f}</p>
                   ))}
                 </div>
 
@@ -173,7 +172,7 @@ const Subscription = () => {
         }}
       >
 
-        <div className="plan-icon">🔥</div>
+        <div className="plan-icon"><FontAwesomeIcon icon={faFire} /></div>
 
         <h4 style={{ color: "#111", fontWeight: "600" }}>
           {plan.name}
@@ -191,7 +190,7 @@ const Subscription = () => {
                 margin: "4px 0",
               }}
             >
-              ✓ {f}
+              <FontAwesomeIcon icon={faCheck} /> {f}
             </p>
           ))}
         </div>
@@ -230,7 +229,8 @@ const Subscription = () => {
         Secure payments · Instant activation · Cancel anytime
       </p>
 
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

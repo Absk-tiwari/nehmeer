@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useDispatch } from 'react-redux';
 import { forgotPassword } from './../../redux/slices/authSlice';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 const ForgotPassword = () => {
   const Navigate = useNavigate();
@@ -92,7 +94,7 @@ const handleSendOTP = async () => {
         {/* BUTTON */}
         <div className="login-btn-wrapper">
           <button className="login-btn" onClick={handleSendOTP}>
-            Send OTP →
+            Send OTP <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
       </div>

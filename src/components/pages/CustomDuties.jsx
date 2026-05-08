@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 
 const CustomDuties = () => {
@@ -26,13 +30,8 @@ const CustomDuties = () => {
   };
 
   return (
-    <div className="duties-page">
-
-      {/* HEADER */}
-      <div className="duties-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h3>Custom Requirements</h3>
-      </div>
+    <AppLayout header={<CommonHeader back title="Custom Requirements" />}>
+      <div className="duties-page">
 
       {/* TABS */}
       <div className="duties-tabs">
@@ -139,11 +138,12 @@ const CustomDuties = () => {
           className="next-btn"
           onClick={() => navigate("/custom-submit")}
         >
-          Next →
+          Next <FontAwesomeIcon icon={faArrowRight} />
         </button>
 
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

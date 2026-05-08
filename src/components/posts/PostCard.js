@@ -1,18 +1,29 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { getJobIcon } from "../../constants/jobIcons";
 
-const PostCard = ({ item, onView, onEdit, onDelete }) => {
+const PostCard = ({ item }) => {
+  const navigate = useNavigate();
+
   if (!item) return null;
 
-  return (
-    <div className="postCard">
+  const jobIcon = item.icon || getJobIcon(item.role_id || item.job_role_id);
 
+  const handleClick = () => {
+    navigate(`/post/${item.id}`);
+  };
+
+  return (
+    <div className="postCard" onClick={handleClick}>
       {/* IMAGE */}
-      <img
-        src={item.image || "https://picsum.photos/200/300"}
-        alt={item.title || "post"}
-        className="postImage"
-        loading="lazy" // ✅ performance boost
-      />
+      <div className="postImageWrapper">
+        <img
+          src={jobIcon}
+          alt={item.title || "post"}
+          className="postImage"
+          loading="lazy"
+        />
+      </div>
 
       {/* CONTENT */}
       <div className="postContent">
@@ -32,44 +43,21 @@ const PostCard = ({ item, onView, onEdit, onDelete }) => {
         </p>
 
         <p
-          className={
-            item.status === "Open"
-              ? "openStatus"
-              : "closedStatus"
-          }
+          className={item.status === "Open" ? "openStatus" : "closedStatus"}
+          style={{ color: item.statusColor }}
         >
-          {item.status || "Open"}{" "}
-          {item.extra ? `• ${item.extra}` : ""}
+          {item.status || "Open"}
         </p>
+      </div>
 
-        {/* ACTION BUTTONS (VERY IMPORTANT 🔥) */}
-        <div className="postActions">
-
-          <button
-            onClick={() => onView?.(item)}
-            className="viewBtn"
-          >
-            View
-          </button>
-
-          <button
-            onClick={() => onEdit?.(item)}
-            className="editBtn"
-          >
-            Edit
-          </button>
-
-          <button
-            onClick={() => onDelete?.(item._id)}
-            className="deleteBtn"
-          >
-            Delete
-          </button>
-
-        </div>
+      {/* Arrow indicator */}
+      <div className="postArrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
       </div>
     </div>
   );
 };
 
-export default React.memo(PostCard); // ✅ performance optimization
+export default React.memo(PostCard);

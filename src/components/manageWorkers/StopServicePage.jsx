@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const StopServicePage = () => {
   const navigate = useNavigate();
@@ -112,13 +114,9 @@ const StopServicePage = () => {
   };
 
   return (
-    <div className="ss-page">
-      <div className="ss-card">
-
-        <div className="ss-header">
-          <h2>Stop {serviceType} Service</h2>
-          <span className="ss-close" onClick={() => navigate(-1)}>✕</span>
-        </div>
+    <AppLayout header={<CommonHeader back title={`Stop ${serviceType} Service`} />}>
+      <div className="ss-page">
+        <div className="ss-card">
 
         <p className="ss-subtitle">
           Please Let Us Know Why You Want To Stop This Service.
@@ -153,8 +151,9 @@ const StopServicePage = () => {
           Submit
         </button>
 
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

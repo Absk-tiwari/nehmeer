@@ -5,6 +5,8 @@ import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
 import { resendOtp, verifyOtp } from "../../redux/slices/authSlice";
 import { getUserMobile, maskMobile } from "../../utils/mobileHelper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 const mobile = getUserMobile();
 
@@ -185,7 +187,7 @@ const OtpVerify = () => {
             onClick={() => handleVerify()}
             disabled={loading}
           >
-            {loading ? "Verifying..." : "Verify OTP →"}
+            {loading ? "Verifying..." : <>Verify OTP <FontAwesomeIcon icon={faArrowRight} /></>}
           </button>
         </div>
 

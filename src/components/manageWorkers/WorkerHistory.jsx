@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
 import SkeletonLoader from "../common/SkeletonLoader";
+import placeholderImage from "../../assets/img/placeholder.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar, faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 
 
 const WorkerHistory = () => {
@@ -29,7 +32,7 @@ const WorkerHistory = () => {
   if (loading) return <SkeletonLoader type="worker" count={3} />;
 
   if (!historyWorkers.length) {
-    return <div>No worker history found</div>;
+    return <div className="no-data">No worker history found</div>;
   }
 
   return (
@@ -38,8 +41,12 @@ const WorkerHistory = () => {
         <div className="worker-card" key={worker.id}>
 
           <img
-            src={worker.profile_photo || "/default.png"}
+            src={worker.profile_photo || placeholderImage}
             alt={worker.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = placeholderImage;
+            }}
           />
 
           <div className="info">
@@ -56,7 +63,7 @@ const WorkerHistory = () => {
             </p>
 
             <div className="worker-rating">
-              ⭐ {worker.rating || 0}
+              <FontAwesomeIcon icon={faStar} /> {worker.rating || 0}
             </div>
           </div>
 
@@ -66,7 +73,7 @@ const WorkerHistory = () => {
               className="three-dot-btn"
               onClick={() => handleMenuToggle(worker.id)}
             >
-              ⋮
+              <FontAwesomeIcon icon={faEllipsisVertical} />
             </span>
 
             {openMenuId === worker.id && (

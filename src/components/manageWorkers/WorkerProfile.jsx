@@ -3,6 +3,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
 import SkeletonLoader from "../common/SkeletonLoader";
+import placeholderImage from "../../assets/img/placeholder.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar, faCheck } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 
 const WorkerProfile = () => {
@@ -26,37 +31,49 @@ const WorkerProfile = () => {
 
   // 🔄 Loader
   if (loading) {
-    return <SkeletonLoader type="profile" count={1} />;
+    return (
+      <AppLayout header={<CommonHeader back title="Loading..." />}>
+        <SkeletonLoader type="profile" count={1} />
+      </AppLayout>
+    );
   }
 
   // ❌ Error
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <AppLayout header={<CommonHeader back title="Error" />}>
+        <div className="error">{error}</div>
+      </AppLayout>
+    );
   }
 
   // ❌ Not found
   if (!worker) {
-    return <h3>Worker not found</h3>;
+    return (
+      <AppLayout header={<CommonHeader back title="Not Found" />}>
+        <h3>Worker not found</h3>
+      </AppLayout>
+    );
   }
 
   return (
-    <div className="wp-page">
-      <div className="wp-container">
-
-        <button className="wp-back" onClick={() => navigate(-1)}>
-          ← Back
-        </button>
-
-        <div className="wp-card">
+    <AppLayout header={<CommonHeader back title={worker.name || "Worker Profile"} />}>
+      <div className="wp-page">
+        <div className="wp-container">
+          <div className="wp-card">
 
           {/* IMAGE */}
           <div className="wp-image-box">
             <img
-              src={worker.profile_photo || "/default.png"}
+              src={worker.profile_photo || placeholderImage}
               alt={worker.name}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = placeholderImage;
+              }}
             />
             {worker.verified && (
-              <span className="wp-verified">✔ Verified</span>
+              <span className="wp-verified"><FontAwesomeIcon icon={faCheck} /> Verified</span>
             )}
           </div>
 
@@ -65,7 +82,7 @@ const WorkerProfile = () => {
           <p className="wp-role">{worker.role || "Worker"}</p>
 
           <div className="wp-rating">
-            ⭐ {worker.rating || 0} ({worker.reviews || 0} reviews)
+            <FontAwesomeIcon icon={faStar} /> {worker.rating || 0} ({worker.reviews || 0} reviews)
           </div>
 
           <div className="wp-info">
@@ -128,9 +145,10 @@ const WorkerProfile = () => {
             Stop Service
           </button>
 
+          </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

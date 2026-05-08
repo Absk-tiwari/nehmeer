@@ -16,31 +16,29 @@ export const getPlans = createAsyncThunk(
   }
 );
 
-// 💎 GET ACTIVE PLAN
-export const getActivePlan = createAsyncThunk(
-  "subscription/getActivePlan",
+// 💎 GET ACTIVE SUBSCRIPTION
+export const getMySubscription = createAsyncThunk(
+  "subscription/getMySubscription",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.get("/subscription/my-plan");
+      const { data } = await axiosInstance.get("/subscription/my-subscription");
       return data;
     } catch (err) {
-      return rejectWithValue("Failed to fetch active plan");
+      return rejectWithValue("Failed to fetch subscription");
     }
   }
 );
 
-// 💳 BUY PLAN
-export const buyPlan = createAsyncThunk(
-  "subscription/buyPlan",
-  async (planId, { rejectWithValue }) => {
+// 💳 VERIFY PAYMENT
+export const verifyPayment = createAsyncThunk(
+  "subscription/verifyPayment",
+  async (paymentData, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.post(
-        `/subscription/buy/${planId}`
-      );
+      const { data } = await axiosInstance.post("/subscription/verify", paymentData);
       return data;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data?.message || "Failed to buy plan"
+        err.response?.data?.message || "Payment verification failed"
       );
     }
   }
@@ -84,42 +82,39 @@ const subscriptionSlice = createSlice({
       })
 
       // ======================
-      // ACTIVE PLAN
+      // MY SUBSCRIPTION
       // ======================
-      .addCase(getActivePlan.pending, (state) => {
+      .addCase(getMySubscription.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getActivePlan.fulfilled, (state, action) => {
+      .addCase(getMySubscription.fulfilled, (state, action) => {
         state.loading = false;
-
-        // ✅ SAFE HANDLING
         state.activePlan =
-          action.payload?.data?.plan ||
-          action.payload?.plan ||
+          action.payload?.data?.subscription ||
+          action.payload?.subscription ||
           action.payload?.data ||
           null;
       })
-      .addCase(getActivePlan.rejected, (state) => {
+      .addCase(getMySubscription.rejected, (state) => {
         state.loading = false;
       })
 
       // ======================
-      // BUY PLAN
+      // VERIFY PAYMENT
       // ======================
-      .addCase(buyPlan.pending, (state) => {
+      .addCase(verifyPayment.pending, (state) => {
         state.buyLoading = true;
         state.error = null;
       })
-      .addCase(buyPlan.fulfilled, (state, action) => {
+      .addCase(verifyPayment.fulfilled, (state, action) => {
         state.buyLoading = false;
-
         state.activePlan =
-          action.payload?.data?.plan ||
-          action.payload?.plan ||
+          action.payload?.data?.subscription ||
+          action.payload?.subscription ||
           action.payload?.data ||
           null;
       })
-      .addCase(buyPlan.rejected, (state, action) => {
+      .addCase(verifyPayment.rejected, (state, action) => {
         state.buyLoading = false;
         state.error = action.payload;
       });

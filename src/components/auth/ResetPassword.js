@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import logo from "../../assets/img/logo.svg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const ResetPassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -111,7 +113,7 @@ const ResetPassword = () => {
             onClick={() => setShowNewPassword(!showNewPassword)}
             style={{ cursor: "pointer" }}
           >
-            {showNewPassword ? "🙈" : "👁️"}
+            <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
           </span>
         </div>
 
@@ -128,14 +130,14 @@ const ResetPassword = () => {
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             style={{ cursor: "pointer" }}
           >
-            {showConfirmPassword ? "🙈" : "👁️"}
+            <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
           </span>
         </div>
 
         {/* BUTTON */}
         <div className="login-btn-wrapper">
           <button className="login-btn" onClick={handleResetPassword}>
-            Update Password →
+            Update Password <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
       </div>

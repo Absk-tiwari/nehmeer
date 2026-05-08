@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import logo from "../../assets/img/logo.svg";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const ChangePassword = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -14,15 +18,8 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="login-page">
-
-      {/* TOP */}
-      <div className="login-top">
-        <div className="logo-circle">
-          <img src={logo} alt="ALLINEUP" />
-        </div>
-        <h2>Change Password</h2>
-      </div>
+    <AppLayout header={<CommonHeader back title="Change Password" />}>
+      <div className="change-password-page">
 
       {/* CARD */}
       <div className="login-card">
@@ -38,7 +35,7 @@ const ChangePassword = () => {
             onClick={() => setShowCurrentPassword(!showCurrentPassword)}
             style={{ cursor: "pointer" }}
           >
-            {showCurrentPassword ? "🙈" : "👁️"}
+            <FontAwesomeIcon icon={showCurrentPassword ? faEyeSlash : faEye} />
           </span>
         </div>
 
@@ -53,7 +50,7 @@ const ChangePassword = () => {
             onClick={() => setShowNewPassword(!showNewPassword)}
             style={{ cursor: "pointer" }}
           >
-            {showNewPassword ? "🙈" : "👁️"}
+            <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
           </span>
         </div>
 
@@ -68,25 +65,20 @@ const ChangePassword = () => {
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             style={{ cursor: "pointer" }}
           >
-            {showConfirmPassword ? "🙈" : "👁️"}
+            <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
           </span>
         </div>
 
         {/* BUTTON */}
         <div className="login-btn-wrapper">
           <button className="login-btn" onClick={handleChangePassword}>
-            Change Password →
+            Change Password <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
 
       </div>
-
-      {/* BACK */}
-      <p className="signup-text">
-        Back to <span onClick={() => navigate("/settings")}>Settings</span>
-      </p>
-
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

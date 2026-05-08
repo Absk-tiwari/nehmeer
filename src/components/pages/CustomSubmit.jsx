@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 
 const CustomSubmit = () => {
@@ -24,13 +26,8 @@ const CustomSubmit = () => {
   };
 
   return (
-    <div className="submit-page">
-
-      {/* HEADER */}
-      <div className="submit-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h3>Custom Requirements</h3>
-      </div>
+    <AppLayout header={<CommonHeader back title="Custom Requirements" />}>
+      <div className="submit-page">
 
       {/* TABS */}
       <div className="req-tabs">
@@ -109,7 +106,8 @@ const CustomSubmit = () => {
         </button>
       </div>
 
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

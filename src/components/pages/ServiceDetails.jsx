@@ -1,7 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ServiceTabs from "../service/ServiceTabs";
-import userImage from "../../assets/img/user1.png";
+import placeholderImage from "../../assets/img/placeholder.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare, faHeart, faCheck, faStar, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const ServiceDetails = () => {
   const { type, id } = useParams();
@@ -16,34 +20,36 @@ const ServiceDetails = () => {
 
   // 🔄 LOADING
   if (loading) {
-    return <div className="loader">Loading...</div>;
+    return (
+      <AppLayout header={<CommonHeader back title="Loading..." />}>
+        <div className="loader">Loading...</div>
+      </AppLayout>
+    );
   }
 
   // ❌ NOT FOUND
   if (!service) {
-    return <div className="no-data">Service not found</div>;
+    return (
+      <AppLayout header={<CommonHeader back title="Not Found" />}>
+        <div className="no-data">Service not found</div>
+      </AppLayout>
+    );
   }
 
   return (
-    <div className="details-page">
-
-      {/* HEADER */}
-      <div className="details-header">
-        <button onClick={() => navigate(-1)}>←</button>
-        <h3>{service.title || "Service"}</h3>
-
-        <div className="header-icons">
-          <span>↗</span>
-          <span>♡</span>
-        </div>
-      </div>
+    <AppLayout header={<CommonHeader back title={service.title || "Service"} />}>
+      <div className="details-page">
 
       {/* PROFILE */}
       <div className="profile-section">
 
         <img
-          src={service.profile_photo || userImage}
+          src={service.profile_photo || placeholderImage}
           alt={service.title}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = placeholderImage;
+          }}
         />
 
         <div className="profile-info">
@@ -52,7 +58,7 @@ const ServiceDetails = () => {
             <h2>{service.name || "No Name"}</h2>
 
             {service.is_verified && (
-              <span className="verified">✔</span>
+              <span className="verified"><FontAwesomeIcon icon={faCheck} /></span>
             )}
           </div>
 
@@ -66,7 +72,7 @@ const ServiceDetails = () => {
 
           <div className="rating-row">
             <span className="rating">
-              ★ {service.rating || "0"}
+              <FontAwesomeIcon icon={faStar} /> {service.rating || "0"}
             </span>
             <span className="reviews">
               {service.reviews || 0} Ratings
@@ -82,7 +88,7 @@ const ServiceDetails = () => {
           </p>
 
           <button className="locate-btn">
-            📍 Locate
+            <FontAwesomeIcon icon={faLocationDot} /> Locate
           </button>
 
         </div>
@@ -96,7 +102,8 @@ const ServiceDetails = () => {
         <button>Submit Enquire</button>
       </div>
 
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

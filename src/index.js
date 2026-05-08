@@ -7,6 +7,8 @@ import store from "./redux/store"; // ✅ persistor removed
 import App from './App';
 import { SearchProvider } from './contexts/SearchContext';
 
+import 'leaflet/dist/leaflet.css';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 // 🔥 DEBUG (optional)

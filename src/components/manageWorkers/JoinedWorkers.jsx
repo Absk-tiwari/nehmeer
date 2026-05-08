@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
 import SkeletonLoader from "../common/SkeletonLoader";
+import placeholderImage from "../../assets/img/placeholder.png";
 
 const JoinedWorkers = () => {
   const navigate = useNavigate();
@@ -41,7 +42,14 @@ const JoinedWorkers = () => {
           onClick={() => navigate(`/manage-workers/profile/${worker.id}`)}
           style={{ cursor: "pointer" }}
         >
-          <img src={worker.profile_photo || "/default.png"} alt={worker.name} />
+          <img
+            src={worker.profile_photo || placeholderImage}
+            alt={worker.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = placeholderImage;
+            }}
+          />
 
           <div className="info">
             <h4>{worker.name || "No Name"}</h4>

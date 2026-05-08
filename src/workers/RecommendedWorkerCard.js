@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import userImage from "../assets/img/user1.png";
+import placeholderImage from "../assets/img/placeholder.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck, faStar } from "@fortawesome/free-solid-svg-icons";
 
 const RecommendedWorkerCard = ({ worker }) => {
   const navigate = useNavigate();
@@ -15,9 +17,13 @@ const RecommendedWorkerCard = ({ worker }) => {
       {/* LEFT IMAGE */}
       <div className="image-section">
         <img
-          src={worker?.image || userImage}
+          src={worker?.image || placeholderImage}
           alt={worker?.name}
           className="worker-img"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = placeholderImage;
+          }}
         />
 
         <button className="rec-view-btn" onClick={handleView}>
@@ -29,7 +35,7 @@ const RecommendedWorkerCard = ({ worker }) => {
       <div className="content-section">
         <div className="name-row">
           <h3>{worker?.name}</h3>
-          {worker?.verified && <span className="verified-badge">✔</span>}
+          {worker?.verified && <span className="verified-badge"><FontAwesomeIcon icon={faCheck} /></span>}
         </div>
 
         <p className="experience">
@@ -40,7 +46,7 @@ const RecommendedWorkerCard = ({ worker }) => {
 
         <div className="rating-row">
           <span className="rating-box">
-            ★ {worker?.rating}
+            <FontAwesomeIcon icon={faStar} /> {worker?.rating}
           </span>
           <span className="reviews">
             {worker?.reviews} Ratings

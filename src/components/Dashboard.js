@@ -1,9 +1,10 @@
-import React, { useEffect, lazy, Suspense } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import banner1 from "../assets/img/banner-head.svg";
 import banner2 from "../assets/img/banner-middle.svg";
+import HeroCarousel from "./common/HeroCarousel";
 import chef from "../assets/img/chef.svg";
 import dog from "../assets/img/dog.svg";
 import driver from "../assets/img/driver.svg";
@@ -14,6 +15,7 @@ import babysitter from "../assets/img/babyshitter.svg";
 import allrounder from "../assets/img/allrounder.svg";
 
 import NavTop from "./layouts/NavTop";
+import MobileSidebar from "./layouts/MobileSidebar";
 import SkeletonLoader from "./common/SkeletonLoader";
 
 import { getNotifications } from "../redux/slices/notificationSlice";
@@ -46,8 +48,10 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const { unreadCount: _unreadCount } = useSelector((state) => state.notifications);
-  const { user, loading } = useSelector((state) => state.auth);
+  const { user, loading, role } = useSelector((state) => state.auth);
   const { total: totalJobs } = useSelector((state) => state.jobs);
 
   const services = [
@@ -61,12 +65,17 @@ const Dashboard = () => {
     { name: "Driver", icon: driver, type: "driver" },
   ];
 
-  // ✅ API CALLS
+  // ✅ API CALLS (only when logged in)
   useEffect(() => {
-    dispatch(getNotifications());
-    dispatch(getProfile());
-    dispatch(getMyJobs());
-  }, [dispatch]);
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(getNotifications());
+      dispatch(getProfile());
+      if (role && role === "employer") {
+        dispatch(getMyJobs());
+      }
+    }
+  }, [dispatch, role]);
 
   // // ✅ PROTECTED ROUTE
   // useEffect(() => {
@@ -87,12 +96,24 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
 
-      {/* 🔔 Notifications */}
-     <NavTop />
+      <MobileSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      {/* HERO */}
-      <div className="hero-card">
-        <img src={banner1} alt="banner" />
+      <NavTop onMenuClick={() => setSidebarOpen(true)} />
+      <div className="hero-card full-width">
+        <HeroCarousel
+          images={[
+            { src: banner1, alt: "Find trusted domestic help" },
+            { src: banner1, alt: "Find trusted domestic help" },
+          ]}
+          autoPlay={true}
+          interval={3000}
+          showArrows={false}
+          showDots={true}
+          infinite={true}
+        />
       </div>
 
       <Suspense fallback={<SkeletonLoader type="profile" count={1} />}>
@@ -114,11 +135,7 @@ const Dashboard = () => {
   Please complete your profile to unlock full features
 </p>
 )}
-
-      {/* OPTIONAL INFO */}
-      {console.log("TOTAL JOBS:", totalJobs)}
-
-      <section className="services">
+      <section className="services" style={{paddingTop:30}}>
         <h2>Housekeeping and Domestic Services</h2>
 
         <div className="service-grid">
@@ -126,7 +143,6 @@ const Dashboard = () => {
             <div
               className="service-item"
               key={i}
-              onClick={() => navigate(`/services/${item.type}`)}
             >
               <div className="service-card">
                 <div className="service-icon">

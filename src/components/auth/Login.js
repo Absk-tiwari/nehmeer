@@ -63,7 +63,7 @@ const Login = () => {
           toast: true,
           position: "top-end",
           icon: "success",
-          title: `Login Successful (${role}) 🎉`,
+          title: `Login Successful!`,
           showConfirmButton: false,
           timer: 2000,
         });
@@ -152,7 +152,9 @@ const Login = () => {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? "Logging in..." : (
+            {loading ? (
+              <Icon icon="eos-icons:loading" className="btn-loader" />
+            ) : (
               <>
                 Login <Icon icon="mdi:arrow-right" />
               </>

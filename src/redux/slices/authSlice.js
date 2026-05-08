@@ -10,12 +10,15 @@ export const loginUser = createAsyncThunk(
       const { data } = await axiosInstance.post("/auth/login", {
         mobile,
         password,
-        role, // ✅ VERY IMPORTANT
+        role,
       });
 
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userRole", role); // ✅ save role
+      // Handle various API response structures
+      const token = data?.token || data?.data?.token || data?.accessToken || data?.data?.accessToken;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("userRole", role);
       }
 
       return data;
@@ -33,8 +36,9 @@ export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async ({ mobile, password, role }, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.post("/auth/request-otp", {
-        mobile,
+      const route = role === 'worker' ? "/auth/register-worker" : "/auth/register-employer";
+      const { data } = await axiosInstance.post(route, {
+        mobile, password
       });
 
       // ✅ Save temp data
@@ -103,6 +107,13 @@ export const verifyOtp = createAsyncThunk(
           password,
         });
 
+        // Save token after registration
+        const token = data?.token || data?.data?.token || data?.accessToken || data?.data?.accessToken;
+        if (token) {
+          localStorage.setItem("token", token);
+          localStorage.setItem("userRole", role);
+        }
+
         // 🧹 cleanup
         localStorage.removeItem("signupMobile");
         localStorage.removeItem("signupPassword");
@@ -160,6 +171,24 @@ export const getProfile = createAsyncThunk(
   }
 );
 
+// 🔥 REFRESH TOKEN
+export const refreshToken = createAsyncThunk(
+  "auth/refreshToken",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post("/auth/refresh");
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+      }
+      return data;
+    } catch (err) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      return rejectWithValue("Session expired. Please login again.");
+    }
+  }
+);
+
 
 // ================= SLICE =================
 
@@ -174,12 +203,15 @@ const authSlice = createSlice({
 },
 
   reducers: {
-   logout: (state) => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("userRole"); // ✅ ADD THIS
-  state.user = null;
-  state.role = null;
-}
+    logout: (state) => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      state.user = null;
+      state.role = null;
+    },
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
@@ -262,9 +294,20 @@ const authSlice = createSlice({
       .addCase(getProfile.rejected, (state) => {
         localStorage.removeItem("token");
         state.user = null;
+      })
+
+      // 🔄 REFRESH TOKEN
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.user = action.payload?.user || state.user;
+      })
+      .addCase(refreshToken.rejected, (state) => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userRole");
+        state.user = null;
+        state.role = null;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setUser } = authSlice.actions;
 export default authSlice.reducer;

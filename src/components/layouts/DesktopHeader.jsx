@@ -17,7 +17,7 @@ const DesktopHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user } = useSelector((state) => state.auth);
+  const { user, role } = useSelector((state) => state.auth);
   const { unreadCount } = useSelector((state) => state.notifications);
 
   const isActive = (path) => location.pathname === path;
@@ -25,9 +25,9 @@ const DesktopHeader = () => {
   const navItems = [
     { path: "/dashboard", label: "Home", icon: faHouse },
     { path: "/manage-workers", label: "Manage Workers", icon: faUserGroup },
-    { path: "/all-posts", label: "My Posts", icon: faFileLines },
+    { path: "/all-posts", label: "My Posts", icon: faFileLines, hideForWorker: true },
     { path: "/profile", label: "Profile", icon: faUser },
-  ];
+  ].filter((item) => !(item.hideForWorker && role === "worker"));
 
   return (
     <header className="desktop-header">

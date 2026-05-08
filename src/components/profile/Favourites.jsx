@@ -1,17 +1,18 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import ServiceCard from "../service/ServiceCard";
 import { getFavourites } from "../../redux/slices/favouriteSlice";
+import AppLayout from "../layouts/AppLayout";
+import CommonHeader from "../layouts/CommonHeader";
 
 const Favourites = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { list, loading } = useSelector(
-    (state) => state.favourites
-  );
+  const { list, loading } = useSelector((state) => state.favourites);
 
   useEffect(() => {
     dispatch(getFavourites());
@@ -19,90 +20,39 @@ const Favourites = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: 50 }}>
-        Loading favourites...
-      </div>
+      <AppLayout header={<CommonHeader back title="Favourites" />}>
+        <div className="page-loading">
+          <FontAwesomeIcon icon={faSpinner} spin className="loading-spinner" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="app-shell">
-
-      <div className="service-list">
-
-        {/* HEADER */}
-        <div className="service-header">
-
-          <div className="header-top">
-
-            <button
-              className="back-btn"
-              onClick={() => navigate(-1)}
-            >
-              ←
-            </button>
-
-            <h2>Favourites</h2>
-
-          </div>
-        </div>
-
-        {/* LIST */}
+    <AppLayout header={<CommonHeader back title="Favourites" />}>
+      <div className="favourites-list">
         {list?.length > 0 ? (
-
           list.map((service) => (
-
             <ServiceCard
               key={service.id}
               service={service}
-              onClick={() =>
-                navigate(`/services/${service.type}/${service.id}`)
-              }
+              onClick={() => navigate(`/services/${service.type}/${service.id}`)}
             />
-
           ))
-
         ) : (
-
-          /* ⭐ EMPTY STATE (INDUSTRY LEVEL) */
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: "80px",
-              padding: "20px",
-            }}
-          >
-            <div style={{ fontSize: "60px" }}>❤️</div>
-
-            <h3 style={{ marginTop: "10px" }}>
-              No Favourites Yet
-            </h3>
-
-            <p style={{ color: "#777", fontSize: "14px" }}>
-              Save your favourite services here for quick access.
-            </p>
-
-            <button
-              onClick={() => navigate("/dashboard")}
-              style={{
-                marginTop: "15px",
-                padding: "10px 18px",
-                border: "none",
-                borderRadius: "8px",
-                background: "#000",
-                color: "#fff",
-                cursor: "pointer",
-              }}
-            >
+          <div className="empty-state">
+            <div className="empty-icon">
+              <FontAwesomeIcon icon={faHeart} />
+            </div>
+            <h3>No Favourites Yet</h3>
+            <p>Save your favourite services here for quick access.</p>
+            <button className="empty-btn" onClick={() => navigate("/dashboard")}>
               Explore Services
             </button>
           </div>
-
         )}
-
       </div>
-
-    </div>
+    </AppLayout>
   );
 };
 

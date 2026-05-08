@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
 
+// ⚠️ WARNING: /favourites endpoints are NOT in the backend API list
+// Backend needs to add /favourites routes or this feature should be removed
+
 // 🔥 GET FAVOURITES
 export const getFavourites = createAsyncThunk(
   "favourites/getFavourites",

@@ -1,3 +1,7 @@
+import placeholderImage from "../../assets/img/placeholder.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart, faCheck, faStar } from "@fortawesome/free-solid-svg-icons";
+
 const ServiceCard = ({ service, onClick }) => {
   return (
    <div className="provider-card">
@@ -6,9 +10,16 @@ const ServiceCard = ({ service, onClick }) => {
       {/* IMAGE */}
       <div className="provider-image">
 
-        <img src={service.image} alt="profile" />
+        <img
+          src={service.image || placeholderImage}
+          alt="profile"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = placeholderImage;
+          }}
+        />
 
-        <button className="fav">♡</button>
+        <button className="fav"><FontAwesomeIcon icon={faHeart} /></button>
 
         <button onClick={onClick} className="view-btn">
           View
@@ -21,7 +32,7 @@ const ServiceCard = ({ service, onClick }) => {
        <div className="provider-name-row">
 
           <h4>{service.name}</h4>
-          <span className="verified">✔</span>
+          <span className="verified"><FontAwesomeIcon icon={faCheck} /></span>
         </div>
 
         <p className="experience">Experience {service.experience}</p>
@@ -29,7 +40,7 @@ const ServiceCard = ({ service, onClick }) => {
 
         <div className="provider-rating-row">
 
-          <span className="rating">★ {service.rating}</span>
+          <span className="rating"><FontAwesomeIcon icon={faStar} /> {service.rating}</span>
           <span className="reviews">{service.reviews} Ratings</span>
         </div>
 
