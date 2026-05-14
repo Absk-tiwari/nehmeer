@@ -12,9 +12,10 @@ const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { role } = useSelector((state) => state.auth);
-  const isWorker = role === "worker";
-
+  const user = useSelector((state) => state.auth.user);
+  const { role } = user || {};
+  const isLoggedIn = !!user;
+  const isEmp = role === "employer" || role === "admin";
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -27,30 +28,28 @@ const BottomNav = () => {
         <span style={{fontWeight:600}}>Home</span>
       </div>
 
-      <div
+      {isEmp && <div
         className={isActive("/manage-workers") ? "active" : ""}
         onClick={() => navigate("/manage-workers")}
       >
         <FontAwesomeIcon icon={faUserGroup} className="nav-icon fs-3" />
         <span style={{fontWeight:600}}>Manage Workers</span>
-      </div>
+      </div>}
 
-      {!isWorker && (
         <div
           className={isActive("/all-posts") ? "active" : ""}
           onClick={() => navigate("/all-posts")}
         >
           <FontAwesomeIcon icon={faFileLines} className="nav-icon fs-3" />
-          <span style={{fontWeight:600}}>My Posts</span>
+          <span style={{fontWeight:600}}>{role !== undefined && role !== 'worker' ? 'My Posts': "Posts"} </span>
         </div>
-      )}
 
       <div
-        className={isActive("/profile") ? "active" : ""}
-        onClick={() => navigate("/profile")}
+        className={isActive(isLoggedIn ? "/profile" : "/login") ? "active" : ""}
+        onClick={() => navigate(isLoggedIn ? "/profile" : "/login")}
       >
         <FontAwesomeIcon icon={faUser} className="nav-icon fs-3" />
-        <span style={{fontWeight:600}}>Profile</span>
+        <span style={{fontWeight:600}}>{isLoggedIn ? "Profile" : "Login"}</span>
       </div>
     </nav>
   );

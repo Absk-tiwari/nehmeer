@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { createPost } from "../../redux/slices/postSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import toast from "react-hot-toast";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
 
@@ -63,20 +64,20 @@ const CustomRequirements = () => {
   // 🔥 SUBMIT
   const handleSubmit = async () => {
     if (!formData.title || !formData.location) {
-      return alert("Please fill required fields");
+      return toast.error("Please fill required fields");
     }
 
     try {
       const result = await dispatch(createPost(formData));
 
       if (createPost.fulfilled.match(result)) {
-        alert("Post Created Successfully ✅");
+        toast.success("Post Created Successfully!");
         navigate("/my-posts");
       } else {
-        alert(result.payload);
+        toast.error(result.payload || "Failed to create post");
       }
     } catch {
-      alert("Something went wrong");
+      toast.error("Something went wrong");
     }
   };
 

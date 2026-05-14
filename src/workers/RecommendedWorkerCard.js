@@ -1,23 +1,23 @@
 import { useNavigate } from "react-router-dom";
-import placeholderImage from "../assets/img/placeholder.png";
+import placeholderImage from "../assets/img/avatar.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faStar } from "@fortawesome/free-solid-svg-icons";
 
-const RecommendedWorkerCard = ({ worker }) => {
+const RecommendedWorkerCard = ({ worker , user={}}) => {
   const navigate = useNavigate();
 
   const handleView = () => {
-    navigate(`/services/${worker?.type}/${worker?._id || worker?.id}`);
-    console.log("test workerrrrrr",worker);
-    console.log("Navigate URL:", `/services/${worker?.type}/${worker?.id}`);
+    const workerId = worker?._id || worker?.id;
+    navigate(`/worker-profile/${workerId}`, { state: { worker } });
   };
 
+  // if(parseInt(worker.id) === user?.id) return null;
   return (
     <div className="recommended-card" onClick={handleView}>
       {/* LEFT IMAGE */}
       <div className="image-section">
         <img
-          src={worker?.image || placeholderImage}
+          src={worker?.profile_photo ?? placeholderImage}
           alt={worker?.name}
           className="worker-img"
           onError={(e) => {
@@ -42,7 +42,7 @@ const RecommendedWorkerCard = ({ worker }) => {
           Experience {worker?.experience}
         </p>
 
-        <p className="role">{worker?.role}</p>
+        <p className="role">{worker.job_title?? worker.role}</p>
 
         <div className="rating-row">
           <span className="rating-box">

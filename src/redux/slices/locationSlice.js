@@ -68,10 +68,14 @@ const locationSlice = createSlice({
       // GET LOCATIONS
       .addCase(getLocations.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(getLocations.fulfilled, (state, action) => {
         state.loading = false;
-        state.locations = action.payload?.data || [];
+        // Backend returns array directly, not wrapped in { data: [...] }
+        state.locations = Array.isArray(action.payload)
+          ? action.payload
+          : (action.payload?.data || []);
       })
       .addCase(getLocations.rejected, (state, action) => {
         state.loading = false;

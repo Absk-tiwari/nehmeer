@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import toast from "react-hot-toast";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
+import ConfirmModal from "../common/ConfirmModal";
+import { logout } from "../../redux/slices/authSlice";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -31,7 +36,9 @@ const Settings = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    setShowLogoutModal(false);
+    dispatch(logout());
+    toast.success("Logged out successfully!");
     navigate("/login");
   };
 
@@ -57,41 +64,23 @@ const Settings = () => {
         ))}
       </div>
 
-      {/* LOGOUT MODAL */}
-      {showLogoutModal && (
-        <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
-          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Log Out</h3>
-            <p>Are you sure you want to log out?</p>
-            <div className="modal-buttons">
-              <button className="cancel-btn" onClick={() => setShowLogoutModal(false)}>
-                Cancel
-              </button>
-              <button className="confirm-btn danger" onClick={handleLogout}>
-                Log Out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        visible={showLogoutModal}
+        message="Are you sure you want to log out of your account?"
+        onCancel={() => setShowLogoutModal(false)}
+        onSuccess={handleLogout}
+        icon="logout"
+        btnText="Log Out"
+      />
 
-      {/* DELETE ACCOUNT MODAL */}
-      {showDeleteModal && (
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Delete Account</h3>
-            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-            <div className="modal-buttons">
-              <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>
-                Cancel
-              </button>
-              <button className="confirm-btn danger" onClick={handleDeleteAccount}>
-                Delete Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        visible={showDeleteModal}
+        message="You will lose access permanently"
+        onCancel={() => setShowDeleteModal(false)}
+        onSuccess={handleDeleteAccount}
+        icon="trash"
+        btnText="Delete Account"
+      />
     </AppLayout>
   );
 };

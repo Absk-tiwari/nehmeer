@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import logo from "../../assets/img/logo.svg";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import { useDispatch } from 'react-redux';
 import { forgotPassword } from './../../redux/slices/authSlice';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,52 +15,26 @@ const dispatch = useDispatch();
 
 const handleSendOTP = async () => {
   if (!mobile) {
-    Swal.fire({
-      icon: "warning",
-      title: "Missing Field",
-      text: "Mobile number is required!",
-    });
-    return;
+    return toast.error("Mobile number is required!");
   }
 
   if (!/^[6-9]\d{9}$/.test(mobile)) {
-    Swal.fire({
-      icon: "error",
-      title: "Invalid Mobile",
-      text: "Enter valid 10-digit mobile number!",
-    });
-    return;
+    return toast.error("Enter valid 10-digit mobile number!");
   }
 
   try {
     const result = await dispatch(forgotPassword({ mobile }));
 
     if (forgotPassword.fulfilled.match(result)) {
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "success",
-        title: "OTP Sent 📱",
-        showConfirmButton: false,
-        timer: 2000,
-      });
-
+      toast.success("OTP Sent!");
       setTimeout(() => {
         Navigate("/otp");
-      }, 2000);
+      }, 1500);
     } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: result.payload || "Something went wrong!",
-      });
+      toast.error(result.payload || "Something went wrong!");
     }
   } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Server Error",
-      text: "Unable to connect. Please try again!",
-    });
+    toast.error("Unable to connect. Please try again!");
   }
 };
 

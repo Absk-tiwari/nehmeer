@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
 
@@ -93,7 +94,7 @@ const StopServicePage = () => {
 
   const handleSubmit = async () => {
     if (!selectedReason) {
-      alert("Please select a reason");
+      toast.error("Please select a reason");
       return;
     }
 
@@ -105,7 +106,7 @@ const StopServicePage = () => {
         selectedReason === "Other reason" ? otherReason : ""
     };
 
-    console.log("Stop Service Payload:", payload);
+    // console.log("Stop Service Payload:", payload);
 
     // 🔥 Future Backend API
     // await axios.post("/api/service/stop", payload);

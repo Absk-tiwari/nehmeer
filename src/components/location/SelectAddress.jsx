@@ -7,6 +7,7 @@ import {
   faLocationCrosshairs,
   faSpinner
 } from "@fortawesome/free-solid-svg-icons";
+import toast from "react-hot-toast";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
 import MapSelector from "./MapSelector";
@@ -161,7 +162,7 @@ const SelectAddress = () => {
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      toast.error("Geolocation is not supported by your browser");
       return;
     }
 
@@ -214,7 +215,7 @@ const SelectAddress = () => {
       },
       (error) => {
         setLoading(false);
-        alert("Unable to get your location. Please enable location access.");
+        toast.error("Unable to get your location. Please enable location access.");
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -222,7 +223,7 @@ const SelectAddress = () => {
 
   const handleConfirm = () => {
     if (!selectedCoords) {
-      alert("Please select a location first");
+      toast.error("Please select a location first");
       return;
     }
 
@@ -232,7 +233,6 @@ const SelectAddress = () => {
       address,
     };
 
-    console.log("Selected Address:", addressData);
 
     if (returnTo) {
       navigate(returnTo, { state: { selectedAddress: addressData, onSelectAction } });

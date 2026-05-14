@@ -6,7 +6,7 @@ import nurse from "../assets/img/nurse.svg";
 import cleaner from "../assets/img/homeAide.svg";
 import maid from "../assets/img/maid.svg";
 import allRounder from "../assets/img/allrounder.svg";
-import defaultIcon from "../assets/img/placeholder.png";
+import defaultIcon from "../assets/img/avatar.jpg";
 
 const jobIcons = {
   1: cook,

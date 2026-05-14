@@ -20,7 +20,6 @@ import SkeletonLoader from "./common/SkeletonLoader";
 
 import { getNotifications } from "../redux/slices/notificationSlice";
 import { getMyJobs } from "../redux/slices/jobSlice";
-import { getProfile } from "../redux/slices/authSlice";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -33,6 +32,7 @@ import {
   faDog,
   faCar,
 } from "@fortawesome/free-solid-svg-icons";
+import toast from "react-hot-toast";
 
 const ProfileProgress = lazy(() =>
   import("./dashboard/ProfileProgress")
@@ -51,7 +51,7 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { unreadCount: _unreadCount } = useSelector((state) => state.notifications);
-  const { user, loading, role } = useSelector((state) => state.auth);
+  const { user, loading } = useSelector((state) => state.auth);
   const { total: totalJobs } = useSelector((state) => state.jobs);
 
   const services = [
@@ -70,12 +70,11 @@ const Dashboard = () => {
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(getNotifications());
-      dispatch(getProfile());
-      if (role && role === "employer") {
+      if (user?.role === "employer") {
         dispatch(getMyJobs());
       }
     }
-  }, [dispatch, role]);
+  }, [dispatch, user?.role]);
 
   // // ✅ PROTECTED ROUTE
   // useEffect(() => {
@@ -83,6 +82,18 @@ const Dashboard = () => {
   //     navigate("/login");
   //   }
   // }, [user, loading, navigate]);
+  const goToSearch = role => {
+    if(user?.role!=='worker') {
+      navigate("/search-results", {
+        state: {
+          search: "",
+          categories: [role.trim()],
+        },
+      });
+    } else {
+      toast.error("Can't view profile as worker!")
+    }
+  }
 
   if (loading) {
     return (
@@ -143,6 +154,7 @@ const Dashboard = () => {
             <div
               className="service-item"
               key={i}
+              onClick={() => goToSearch(item.name)}
             >
               <div className="service-card">
                 <div className="service-icon">

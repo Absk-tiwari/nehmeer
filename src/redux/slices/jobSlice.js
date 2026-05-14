@@ -30,7 +30,7 @@ export const getAllJobs = createAsyncThunk(
   async (
     {
       tab = "all",
-      pagination = { page: 1, limit: 20 },
+      pagination = { page: 1, limit: 10 },
       filters = {},
       sortBy = "Newest First",
     } = {},
@@ -43,10 +43,38 @@ export const getAllJobs = createAsyncThunk(
         filters,
         sortBy,
       });
-      return data;
+      return { ...data, page: pagination.page };
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Failed to fetch jobs"
+      );
+    }
+  }
+);
+
+// 🔥 LOAD MORE JOBS (appends to existing list)
+export const loadMoreJobs = createAsyncThunk(
+  "jobs/loadMoreJobs",
+  async (
+    {
+      tab = "all",
+      pagination = { page: 1, limit: 10 },
+      filters = {},
+      sortBy = "Newest First",
+    } = {},
+    { rejectWithValue }
+  ) => {
+    try {
+      const { data } = await axiosInstance.post("/jobs", {
+        tab,
+        pagination,
+        filters,
+        sortBy,
+      });
+      return { ...data, page: pagination.page };
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to load more jobs"
       );
     }
   }
@@ -241,8 +269,12 @@ export const deleteJob = createAsyncThunk(
 const jobSlice = createSlice({
   name: "jobs",
   initialState: {
+    forYou: [],
     list: [],
     total: 0,
+    currentPage: 1,
+    hasMore: true,
+    loadingMore: false,
     selectedJob: null,
     applicants: [],
     customQuestions: [],
@@ -258,6 +290,12 @@ const jobSlice = createSlice({
       state.createSuccess = false;
       state.error = null;
     },
+    resetJobsList: (state) => {
+      state.forYou = [];
+      state.list = [];
+      state.currentPage = 1;
+      state.hasMore = true;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -268,12 +306,40 @@ const jobSlice = createSlice({
       })
       .addCase(getAllJobs.fulfilled, (state, action) => {
         state.loading = false;
-        const rawData = action.payload?.data || [];
-        state.list = rawData.map(transformJobData);
+        const data = action.payload?.data || {};
+        const forYouRaw = data.for_you || [];
+        const postsRaw = data.posts || [];
+        state.forYou = forYouRaw.map(transformJobData);
+        state.list = postsRaw.map(transformJobData);
         state.total = action.payload?.pagination?.total || 0;
+        state.currentPage = action.payload?.page || 1;
+        state.hasMore = (state.forYou.length + state.list.length) < state.total;
       })
       .addCase(getAllJobs.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+
+      // LOAD MORE JOBS
+      .addCase(loadMoreJobs.pending, (state) => {
+        state.loadingMore = true;
+        state.error = null;
+      })
+      .addCase(loadMoreJobs.fulfilled, (state, action) => {
+        state.loadingMore = false;
+        const data = action.payload?.data || {};
+        const forYouRaw = data.for_you || [];
+        const postsRaw = data.posts || [];
+        const newForYou = forYouRaw.map(transformJobData);
+        const newPosts = postsRaw.map(transformJobData);
+        state.forYou = [...state.forYou, ...newForYou];
+        state.list = [...state.list, ...newPosts];
+        state.total = action.payload?.pagination?.total || state.total;
+        state.currentPage = action.payload?.page || state.currentPage;
+        state.hasMore = (state.forYou.length + state.list.length) < state.total;
+      })
+      .addCase(loadMoreJobs.rejected, (state, action) => {
+        state.loadingMore = false;
         state.error = action.payload;
       })
 
@@ -397,5 +463,5 @@ const jobSlice = createSlice({
   },
 });
 
-export const { resetJobState } = jobSlice.actions;
+export const { resetJobState, resetJobsList } = jobSlice.actions;
 export default jobSlice.reducer;

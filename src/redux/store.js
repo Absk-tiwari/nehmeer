@@ -12,24 +12,25 @@ import profileReducer from "./slices/profileSlice";
 import favouriteReducer from "./slices/favouriteSlice";
 import subscriptionReducer from "./slices/subscriptionSlice";
 import locationReducer from "./slices/locationSlice";
+import adminReducer from "./slices/adminSlice";
 const authPersistConfig = {
   key: "auth",
   storage,
-  whitelist: ["user"],
+  whitelist: ["user", "token", "role"],
 };
 
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
   requirements: requirementReducer,
   notifications: notificationReducer,
-  jobs: jobReducer, 
-  workers: workerReducer, 
+  jobs: jobReducer,
+  workers: workerReducer,
   posts: postReducer,
   profile: profileReducer,
   favourites: favouriteReducer,
-   subscription: subscriptionReducer,
-    locations: locationReducer,
-   
+  subscription: subscriptionReducer,
+  locations: locationReducer,
+  admin: adminReducer,
 });
 
 const store = configureStore({

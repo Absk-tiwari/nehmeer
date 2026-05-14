@@ -6,7 +6,17 @@ import {
   getMySubscription,
 } from "../../redux/slices/subscriptionSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faCheck, faGem, faFire } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faCrown,
+  faGem,
+  faRocket,
+  faStar,
+  faHeadset,
+  faEye,
+  faBolt,
+  faShieldAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
 
@@ -23,22 +33,26 @@ const Subscription = () => {
     dispatch(getMySubscription());
   }, [dispatch]);
 
-  // 🔥 fallback plans (so UI never breaks)
   const fallbackPlans = [
     {
       id: 1,
-      name: "Basic Plan",
+      name: "Basic",
       price: 299,
+      period: "month",
+      icon: faGem,
       features: [
         "Unlimited profile checking",
-        "1 Hire Requests / month",
+        "1 Hire Request / month",
         "Basic support access",
       ],
     },
     {
       id: 2,
-      name: "Standard Plan",
+      name: "Standard",
       price: 499,
+      period: "month",
+      icon: faRocket,
+      popular: true,
       features: [
         "20 Custom Posts",
         "10 Custom Requests",
@@ -49,8 +63,10 @@ const Subscription = () => {
     },
     {
       id: 3,
-      name: "Premium Plan",
+      name: "Premium",
       price: 899,
+      period: "month",
+      icon: faCrown,
       features: [
         "40 Custom Posts",
         "20 Custom Requests",
@@ -62,173 +78,175 @@ const Subscription = () => {
     },
   ];
 
-  const safePlans =
-    plans && plans.length > 0 ? plans : fallbackPlans;
+  const safePlans = plans && plans.length > 0 ? plans : fallbackPlans;
+
+  const getPlanIcon = (index) => {
+    const icons = [faGem, faRocket, faCrown];
+    return icons[index] || faGem;
+  };
 
   return (
     <AppLayout header={<CommonHeader back title="My Subscription" />}>
       <div className="subscription-page">
-
-      {/* CURRENT PLAN */}
-      <div className="my-plan-section">
-        <h3>My Plan</h3>
-
-        {activePlan ? (
-          <div className="my-plan-card">
-            <div className="plan-icon"><FontAwesomeIcon icon={faUser} /></div>
-
-            <div className="plan-info">
-              <h4>{activePlan.name}</h4>
-
-              {activePlan.features?.map((f, i) => (
-                <p key={i}><FontAwesomeIcon icon={faCheck} /> {f}</p>
-              ))}
-
-              <button className="manage-plan-btn">
-                Manage Plan
-              </button>
+        {/* CURRENT PLAN BANNER */}
+        {activePlan && (
+          <div className="current-plan-banner">
+            <div className="current-plan-badge">
+              <FontAwesomeIcon icon={faStar} />
+              <span>Active Plan</span>
+            </div>
+            <div className="current-plan-content">
+              <div className="current-plan-left">
+                <h3>{activePlan.name}</h3>
+                <p className="current-plan-price">
+                  ₹{activePlan.price}
+                  <span>/month</span>
+                </p>
+              </div>
+              <button className="manage-plan-btn">Manage</button>
             </div>
           </div>
-        ) : (
-          <p style={{ textAlign: "center", color: "#999" }}>
-            No active plan found
-          </p>
         )}
-      </div>
 
-      {/* ALL PLANS */}
-      <div className="all-plans-section">
-        <h3>All Plans</h3>
-
-        <div className="plans-grid">
+        {/* PLANS SECTION */}
+        <div className="plans-section">
+          <div className="plans-header">
+            <h2>Choose Your Plan</h2>
+            <p>Select the plan that best fits your needs</p>
+          </div>
 
           {loading ? (
-            <p>Loading plans...</p>
+            <div className="plans-loading">
+              <div className="loading-spinner"></div>
+              <p>Loading plans...</p>
+            </div>
           ) : (
-            safePlans.map((plan, index) => (
-              <div key={plan.id} className={`plan-card plan-${index}`}>
+            <div className="plans-grid">
+              {safePlans.map((plan, index) => {
+                const isActive = activePlan?.id === plan.id;
+                const isPopular = plan.popular || index === 1;
 
-                <div className="plan-icon"><FontAwesomeIcon icon={faGem} /></div>
+                return (
+                  <div
+                    key={plan.id}
+                    className={`plan-card plan-${index} ${isActive ? "active" : ""} ${isPopular ? "popular" : ""}`}
+                  >
+                    {isPopular && (
+                      <div className="popular-badge">
+                        <FontAwesomeIcon icon={faStar} /> Most Popular
+                      </div>
+                    )}
 
-                <h4>{plan.name}</h4>
+                    {isActive && <div className="active-badge">Current</div>}
 
-                <h2>₹ {plan.price}</h2>
+                    <div className="plan-icon">
+                      <FontAwesomeIcon icon={plan.icon || getPlanIcon(index)} />
+                    </div>
 
-                <div className="plan-features">
-                  {plan.features?.map((f, i) => (
-                    <p key={i}><FontAwesomeIcon icon={faCheck} /> {f}</p>
-                  ))}
-                </div>
+                    <h4 className="plan-name">{plan.name}</h4>
 
-                <button className="plan-btn black">
-                  {activePlan?.id === plan.id
-                    ? "Current Plan"
-                    : "Buy Plan"}
-                </button>
+                    <div className="plan-price">
+                      <span className="currency">₹</span>
+                      <span className="amount">{plan.price}</span>
+                      <span className="period">/{plan.period || "month"}</span>
+                    </div>
 
-              </div>
-            ))
+                    <div className="plan-features">
+                      {plan.features?.map((f, i) => (
+                        <div key={i} className="feature-item">
+                          <FontAwesomeIcon icon={faCheck} className="check-icon" />
+                          <span>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      className={`plan-btn ${isActive ? "current" : ""}`}
+                      disabled={isActive}
+                    >
+                      {isActive ? "Current Plan" : "Get Started"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           )}
-
-        </div>
-      </div>
-
-      {/* ⭐ NEW SECTION (RECOMMENDED - INDUSTRY STANDARD) */}
-  {/* ⭐ NEW SECTION (RECOMMENDED - INDUSTRY STANDARD) */}
-<div
-  className="all-plans-section"
-  style={{
-    marginTop: "30px",
-    padding: "20px",
-    borderRadius: "12px",
-    background: "linear-gradient(135deg, #ffffff, #f7f9fc)",
-    border: "1px solid #e6e6e6",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-  }}
->
-  <h3
-    style={{
-      marginBottom: "15px",
-      fontSize: "18px",
-      fontWeight: "600",
-      color: "#222",
-    }}
-  >
-    Recommended For You
-  </h3>
-
-  <div className="plans-grid">
-
-    {fallbackPlans.slice(1).map((plan) => (
-      <div
-        key={plan.id}
-        className="plan-card"
-        style={{
-          background: "#fff",
-          borderRadius: "12px",
-          padding: "15px",
-          border: "1px solid #eee",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        }}
-      >
-
-        <div className="plan-icon"><FontAwesomeIcon icon={faFire} /></div>
-
-        <h4 style={{ color: "#111", fontWeight: "600" }}>
-          {plan.name}
-        </h4>
-
-        <h2 style={{ color: "#000" }}>₹ {plan.price}</h2>
-
-        <div className="plan-features">
-          {plan.features.map((f, i) => (
-            <p
-              key={i}
-              style={{
-                color: "#444",
-                fontSize: "13px",
-                margin: "4px 0",
-              }}
-            >
-              <FontAwesomeIcon icon={faCheck} /> {f}
-            </p>
-          ))}
         </div>
 
-        <button className="plan-btn black">
-          Upgrade Now
-        </button>
+        {/* BENEFITS SECTION */}
+        <div className="benefits-section">
+          <h3>Why Upgrade?</h3>
+          <div className="benefits-grid">
+            <div className="benefit-item">
+              <div className="benefit-icon">
+                <FontAwesomeIcon icon={faRocket} />
+              </div>
+              <div className="benefit-text">
+                <h4>More Requests</h4>
+                <p>Send more hire requests monthly</p>
+              </div>
+            </div>
+            <div className="benefit-item">
+              <div className="benefit-icon">
+                <FontAwesomeIcon icon={faEye} />
+              </div>
+              <div className="benefit-text">
+                <h4>Higher Visibility</h4>
+                <p>Stand out in search results</p>
+              </div>
+            </div>
+            <div className="benefit-item">
+              <div className="benefit-icon">
+                <FontAwesomeIcon icon={faBolt} />
+              </div>
+              <div className="benefit-text">
+                <h4>Faster Matching</h4>
+                <p>Get matched with jobs quickly</p>
+              </div>
+            </div>
+            <div className="benefit-item">
+              <div className="benefit-icon">
+                <FontAwesomeIcon icon={faHeadset} />
+              </div>
+              <div className="benefit-text">
+                <h4>Priority Support</h4>
+                <p>24/7 dedicated assistance</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      </div>
-    ))}
-  </div>
-</div>
-      {/* WHY UPGRADE */}
-      <div className="why-upgrade">
-        <h4>Why Upgrade?</h4>
-        <ul>
-          <li>More hire requests</li>
-          <li>Higher visibility in search</li>
-          <li>Faster job matching</li>
-          <li>Priority customer support</li>
-        </ul>
-      </div>
-
-      {/* HELP */}
-      <div className="help-box">
-        <div>
-          <p>Need help choosing a plan?</p>
-          <button onClick={() => navigate("/support")}>
-            Help & Support
+        {/* HELP SECTION */}
+        <div className="help-section">
+          <div className="help-content">
+            <FontAwesomeIcon icon={faHeadset} className="help-icon" />
+            <div className="help-text">
+              <h4>Need help choosing?</h4>
+              <p>Our team is here to assist you</p>
+            </div>
+          </div>
+          <button className="help-btn" onClick={() => navigate("/support")}>
+            Contact Support
           </button>
         </div>
-      </div>
 
-      {/* FOOTER */}
-      <p className="subscription-footer">
-        Secure payments · Instant activation · Cancel anytime
-      </p>
-
+        {/* TRUST BADGES */}
+        <div className="trust-section">
+          <div className="trust-item">
+            <FontAwesomeIcon icon={faShieldAlt} />
+            <span>Secure Payments</span>
+          </div>
+          <div className="trust-divider"></div>
+          <div className="trust-item">
+            <FontAwesomeIcon icon={faBolt} />
+            <span>Instant Activation</span>
+          </div>
+          <div className="trust-divider"></div>
+          <div className="trust-item">
+            <FontAwesomeIcon icon={faCheck} />
+            <span>Cancel Anytime</span>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

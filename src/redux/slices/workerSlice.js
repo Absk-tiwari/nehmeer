@@ -22,12 +22,11 @@ const transformWorkerData = (item) => {
     verified,
     type,
   } = profile;
-
   return {
     ...item,
     id: item.id?.toString(),
     _id: item.id?.toString(),
-    title: title || "Job-Seeker",
+    title: title || item.job_title || "Job-Seeker",
     name: name || item.name || "Worker",
     image: profile_photo || item.profile_photo,
     location: city || item.city || answers["Location"] || "-",
@@ -57,10 +56,34 @@ export const getSearchWorkers = createAsyncThunk(
         address,
         limit,
       });
-      return data;
+      return { ...data, page };
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Failed to fetch workers"
+      );
+    }
+  }
+);
+
+// 🔥 LOAD MORE SEARCH WORKERS (appends to existing list)
+export const loadMoreSearchWorkers = createAsyncThunk(
+  "workers/loadMoreSearchWorkers",
+  async (
+    { search = "", category = "", address = {}, page = 1, limit = 10 } = {},
+    { rejectWithValue }
+  ) => {
+    try {
+      const { data } = await axiosInstance.post("/profile", {
+        search,
+        category,
+        page,
+        address,
+        limit,
+      });
+      return { ...data, page };
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to load more workers"
       );
     }
   }
@@ -118,12 +141,29 @@ const workerSlice = createSlice({
   initialState: {
     list: [],
     recommendedWorkers: [],
+    recommendedTotal: 0,
+    recommendedPage: 1,
+    recommendedHasMore: true,
+    loadingMoreRecommended: false,
     selectedWorker: null,
+    workerCache: {},
     loading: false,
     recommendedLoading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    resetRecommendedWorkers: (state) => {
+      state.recommendedWorkers = [];
+      state.recommendedPage = 1;
+      state.recommendedHasMore = true;
+    },
+    setSelectedWorkerFromCache: (state, action) => {
+      const id = action.payload;
+      if (state.workerCache[id]) {
+        state.selectedWorker = state.workerCache[id];
+      }
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -136,9 +176,30 @@ const workerSlice = createSlice({
         state.recommendedLoading = false;
         const rawData = action.payload?.data || [];
         state.recommendedWorkers = rawData.map(transformWorkerData);
+        state.recommendedTotal = action.payload?.pagination?.total || rawData.length;
+        state.recommendedPage = action.payload?.page || 1;
+        state.recommendedHasMore = state.recommendedWorkers.length < state.recommendedTotal;
       })
       .addCase(getSearchWorkers.rejected, (state, action) => {
         state.recommendedLoading = false;
+        state.error = action.payload;
+      })
+
+      // 🔄 LOAD MORE SEARCH WORKERS
+      .addCase(loadMoreSearchWorkers.pending, (state) => {
+        state.loadingMoreRecommended = true;
+      })
+      .addCase(loadMoreSearchWorkers.fulfilled, (state, action) => {
+        state.loadingMoreRecommended = false;
+        const rawData = action.payload?.data || [];
+        const newWorkers = rawData.map(transformWorkerData);
+        state.recommendedWorkers = [...state.recommendedWorkers, ...newWorkers];
+        state.recommendedTotal = action.payload?.pagination?.total || state.recommendedTotal;
+        state.recommendedPage = action.payload?.page || state.recommendedPage;
+        state.recommendedHasMore = state.recommendedWorkers.length < state.recommendedTotal;
+      })
+      .addCase(loadMoreSearchWorkers.rejected, (state, action) => {
+        state.loadingMoreRecommended = false;
         state.error = action.payload;
       })
 
@@ -176,6 +237,9 @@ const workerSlice = createSlice({
       .addCase(getWorkerInfo.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedWorker = action.payload;
+        if (action.payload?.id) {
+          state.workerCache[action.payload.id] = action.payload;
+        }
       })
       .addCase(getWorkerInfo.rejected, (state, action) => {
         state.loading = false;
@@ -184,4 +248,5 @@ const workerSlice = createSlice({
   },
 });
 
+export const { resetRecommendedWorkers, setSelectedWorkerFromCache } = workerSlice.actions;
 export default workerSlice.reducer;

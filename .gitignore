@@ -12,3 +12,4 @@
 .env.production.local
 .env
 .claude/*
+build.zip

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "https://nehmeer-api.onrender.com/api",
+  baseURL: process.env.REACT_APP_BACKEND_URI ?? "http://localhost:5064/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -63,18 +63,23 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const storedRefreshToken = localStorage.getItem("refreshToken");
+        if (!storedRefreshToken) {
+          throw new Error("No refresh token available");
+        }
+
         // Try to refresh the token
         const { data } = await axios.post(
-          "https://nehmeer-api.onrender.com/api/auth/refresh",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          "http://localhost:5064/api/auth/refresh",
+          { refreshToken: storedRefreshToken }
         );
 
         const newToken = data?.token || data?.data?.token || data?.accessToken;
+        const newRefreshToken = data?.refreshToken || data?.data?.refreshToken;
+
+        if (newRefreshToken) {
+          localStorage.setItem("refreshToken", newRefreshToken);
+        }
 
         if (newToken) {
           localStorage.setItem("token", newToken);
@@ -91,6 +96,7 @@ axiosInstance.interceptors.response.use(
 
         // Refresh failed - clear auth and redirect to login
         localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("userRole");
 
         const currentPath = window.location.hash.replace("#", "") || "/";

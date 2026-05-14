@@ -1,14 +1,13 @@
-import axios from "axios"; 
+import axios from "axios";
 import Themeroutes from "./routes/Router.js";
 import ShowError from './components/errors/ShowError'
 import './App.css';
 import './assets/scss/app.scss'
 import 'bootstrap/dist/js/bootstrap.min.js';
 
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useRoutes } from "react-router-dom";
-import { useEffect } from "react";
-import { getProfile } from "./redux/slices/authSlice.js";
+import { Toaster } from "react-hot-toast";
 
 // ✅ FIXED TOKEN
 const token = localStorage.getItem('token');
@@ -25,31 +24,8 @@ axios.defaults.baseURL =
 axios.defaults.headers.common = headers;
 
 function App() {
-
-  const dispatch = useDispatch();
   const { error, errorCode } = useSelector((state) => state.auth);
   const routing = useRoutes(Themeroutes);
-
-
-
-  useEffect(() => {
-  const token = localStorage.getItem("token");
-  console.log("TOKEN:", token);
-
-  if (token) {
-    dispatch(getProfile());
-  }
-}, [dispatch]);
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-
-  //   if (token) {
-  //     dispatch(getProfile());
-  //   }
-  // }, [dispatch]);
-
-  
 
   if (error) {
     if (errorCode === 500) {
@@ -57,7 +33,31 @@ function App() {
     }
   }
 
-  return routing;
+  return (
+    <>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+          success: {
+            style: {
+              background: '#22c55e',
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444',
+            },
+          },
+        }}
+      />
+      {routing}
+    </>
+  );
 }
 
 export default App;

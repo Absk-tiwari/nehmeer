@@ -38,6 +38,15 @@ import CustomSubmit from "../components/pages/CustomSubmit.jsx";
 import PostDetails from "../components/posts/PostDetails.jsx";
 import About from "../components/pages/About.jsx";
 
+// Admin Panel Imports
+import AdminProtectedRoute from "../admin/components/AdminProtectedRoute";
+const AdminLayout = lazy(() => import("../admin/layouts/AdminLayout"));
+const AdminLogin = lazy(() => import("../admin/pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboard"));
+const WorkersManagement = lazy(() => import("../admin/pages/WorkersManagement"));
+const PushNotifications = lazy(() => import("../admin/pages/PushNotifications"));
+const AdminSettings = lazy(() => import("../admin/pages/AdminSettings"));
+
 const FullLayout = lazy(() => import("../components/layouts/FullLayout.js"));
 
 /***** Pages ****/
@@ -48,6 +57,27 @@ const Dashboard = lazy(() => import("../components/Dashboard.js"));
 /**** Routes ****/
 
 const ThemeRoutes = [
+  // Admin Panel Routes (Separate layout)
+  {
+    path: "/admin/login",
+    element: <AdminLogin />
+  },
+  {
+    path: "/admin",
+    element: (
+      <AdminProtectedRoute>
+        <AdminLayout />
+      </AdminProtectedRoute>
+    ),
+    children: [
+      { path: "", element: <AdminDashboard /> },
+      { path: "workers", element: <WorkersManagement /> },
+      { path: "notifications", element: <PushNotifications /> },
+      { path: "settings", element: <AdminSettings /> }
+    ]
+  },
+
+  // Main App Routes
   {
     path: "/",
     element: <FullLayout />,
@@ -73,18 +103,18 @@ const ThemeRoutes = [
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
       { path: "/license", element: <License /> },
       { path: "/about", element: <About /> },
+      { path: "/post/:id", element: <PostDetails /> },
 
-      // Semi-Protected Routes (show login prompt if not logged in)
+      // Protected Routes (require user data - show login prompt)
+      { path: "/language", element: <SemiProtectedRoute><LanguageSelector /></SemiProtectedRoute> },
       { path: "/profile", element: <SemiProtectedRoute><Profile /></SemiProtectedRoute> },
       { path: "/notifications", element: <SemiProtectedRoute><Notifications /></SemiProtectedRoute> },
       { path: "/all-posts", element: <SemiProtectedRoute><AllPostsScreen /></SemiProtectedRoute> },
-      { path: "/post/:id", element: <SemiProtectedRoute><PostDetails /></SemiProtectedRoute> },
       { path: "/post/:id/applicants", element: <SemiProtectedRoute><PostDetails /></SemiProtectedRoute> },
       { path: "/manage-workers", element: <SemiProtectedRoute><ManageWorkers /></SemiProtectedRoute> },
       { path: "/manage-workers/feedback/:id", element: <SemiProtectedRoute><FeedbackPage /></SemiProtectedRoute> },
       { path: "/manage-workers/stop/:id", element: <SemiProtectedRoute><StopServicePage /></SemiProtectedRoute> },
       { path: "/manage-workers/profile/:id", element: <SemiProtectedRoute><WorkerProfile /></SemiProtectedRoute> },
-      { path: "/language", element: <SemiProtectedRoute><LanguageSelector /></SemiProtectedRoute> },
       { path: "/subscription", element: <SemiProtectedRoute><Subscription /></SemiProtectedRoute> },
       { path: "/favourites", element: <SemiProtectedRoute><Favourites /></SemiProtectedRoute> },
       { path: "/saved-location", element: <SemiProtectedRoute><SavedLocation /></SemiProtectedRoute> },

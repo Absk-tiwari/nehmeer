@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
 import SkeletonLoader from "../common/SkeletonLoader";
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faCheck } from "@fortawesome/free-solid-svg-icons";
 import AppLayout from "../layouts/AppLayout";
@@ -62,88 +62,89 @@ const WorkerProfile = () => {
         <div className="wp-container">
           <div className="wp-card">
 
-          {/* IMAGE */}
-          <div className="wp-image-box">
-            <img
-              src={worker.profile_photo || placeholderImage}
-              alt={worker.name}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = placeholderImage;
-              }}
-            />
-            {worker.verified && (
-              <span className="wp-verified"><FontAwesomeIcon icon={faCheck} /> Verified</span>
-            )}
-          </div>
-
-          {/* BASIC INFO */}
-          <h2 className="wp-name">{worker.name || "No Name"}</h2>
-          <p className="wp-role">{worker.role || "Worker"}</p>
-
-          <div className="wp-rating">
-            <FontAwesomeIcon icon={faStar} /> {worker.rating || 0} ({worker.reviews || 0} reviews)
-          </div>
-
-          <div className="wp-info">
-            <p><strong>Age:</strong> {worker.age || "N/A"}</p>
-            <p><strong>Experience:</strong> {worker.experience || "N/A"}</p>
-            <p><strong>Location:</strong> {worker.location || "N/A"}</p>
-          </div>
-
-          {/* ABOUT */}
-          {worker.about && (
-            <div className="wp-about">
-              <h3>About</h3>
-              <p><strong>Language:</strong> {worker.about.language || "N/A"}</p>
-              <p><strong>Education:</strong> {worker.about.education || "N/A"}</p>
-              <p><strong>Religion:</strong> {worker.about.religion || "N/A"}</p>
-              <p><strong>Status:</strong> {worker.about.status || "N/A"}</p>
-              <p className="wp-description">
-                {worker.about.description || ""}
-              </p>
+            {/* IMAGE */}
+            <div className="wp-image-box">
+              <img
+                src={worker.profile_photo ?? placeholderImage
+                }
+                alt={worker.name}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = placeholderImage;
+                }}
+              />
+              {worker.verified && (
+                <span className="wp-verified"><FontAwesomeIcon icon={faCheck} /> Verified</span>
+              )}
             </div>
-          )}
 
-          {/* SALARY */}
-          <div className="wp-salary">
-            <h3>Salary Details</h3>
+            {/* BASIC INFO */}
+            <h2 className="wp-name">{worker.name || "No Name"}</h2>
+            <p className="wp-role">{worker.role || "Worker"}</p>
 
-            {worker.salary?.partTime && (
-              <div className="wp-salary-card">
-                <h4>Part Time</h4>
-                <p>{worker.salary.partTime.price}</p>
-                <div className="wp-slots">
-                  {worker.salary.partTime.slots?.map((slot, index) => (
-                    <span key={index}>{slot}</span>
-                  ))}
-                </div>
+            <div className="wp-rating">
+              <FontAwesomeIcon icon={faStar} /> {worker.rating || 0} ({worker.reviews || 0} reviews)
+            </div>
+
+            <div className="wp-info">
+              <p><strong>Age:</strong> {worker.age || "N/A"}</p>
+              <p><strong>Experience:</strong> {worker.experience || "N/A"} years</p>
+              <p><strong>Location:</strong> {worker.location || "N/A"}</p>
+            </div>
+
+            {/* ABOUT */}
+            {worker.about && (
+              <div className="wp-about">
+                <h3>About</h3>
+                <p><strong>Language:</strong> {worker.about.language || "N/A"}</p>
+                <p><strong>Education:</strong> {worker.about.education || "N/A"}</p>
+                <p><strong>Religion:</strong> {worker.about.religion || "N/A"}</p>
+                <p><strong>Status:</strong> {worker.about.status || "N/A"}</p>
+                <p className="wp-description">
+                  {worker.about.description || ""}
+                </p>
               </div>
             )}
 
-            {worker.salary?.fullTime && (
-              <div className="wp-salary-card">
-                <h4>Full Time</h4>
-                <p>{worker.salary.fullTime.price}</p>
-                <div className="wp-slots">
-                  {worker.salary.fullTime.slots?.map((slot, index) => (
-                    <span key={index}>{slot}</span>
-                  ))}
+            {/* SALARY */}
+            <div className="wp-salary">
+              <h3>Salary Details</h3>
+
+              {worker.salary?.partTime && (
+                <div className="wp-salary-card">
+                  <h4>Part Time</h4>
+                  <p>{worker.salary.partTime.price}</p>
+                  <div className="wp-slots">
+                    {worker.salary.partTime.slots?.map((slot, index) => (
+                      <span key={index}>{slot}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-          </div>
+              {worker.salary?.fullTime && (
+                <div className="wp-salary-card">
+                  <h4>Full Time</h4>
+                  <p>{worker.salary.fullTime.price}</p>
+                  <div className="wp-slots">
+                    {worker.salary.fullTime.slots?.map((slot, index) => (
+                      <span key={index}>{slot}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* ACTION */}
-          <button
-            className="wp-stop-btn"
-            onClick={() =>
-              navigate(`/manage-workers/stop/${worker.id}`)
-            }
-          >
-            Stop Service
-          </button>
+            </div>
+
+            {/* ACTION */}
+            <button
+              className="wp-stop-btn"
+              onClick={() =>
+                navigate(`/manage-workers/stop/${worker.id}`)
+              }
+            >
+              Stop Service
+            </button>
 
           </div>
         </div>

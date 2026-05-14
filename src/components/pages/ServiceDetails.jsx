@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ServiceTabs from "../service/ServiceTabs";
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUpRightFromSquare, faHeart, faCheck, faStar, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import AppLayout from "../layouts/AppLayout";
@@ -12,6 +12,7 @@ const ServiceDetails = () => {
   const navigate = useNavigate();
 
   const { list, loading } = useSelector((state) => state.jobs);
+  const { user } = useSelector((state) => state.auth);
 
   // ✅ FIND FROM REDUX DATA
   const service = list.find(
@@ -99,7 +100,15 @@ const ServiceDetails = () => {
 
       {/* BUTTON */}
       <div className="bottom-enquire">
-        <button>Submit Enquire</button>
+        {user ? (
+          <button onClick={() => navigate("/create-post", { state: { worker: service } })}>
+            Submit Enquire
+          </button>
+        ) : (
+          <button onClick={() => navigate("/login")}>
+            Login to Enquire
+          </button>
+        )}
       </div>
 
       </div>

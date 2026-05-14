@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import logo from "../../assets/img/logo.svg";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
@@ -15,38 +15,19 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   const handleResetPassword = async () => {
-    // ✅ Validation
     if (!newPassword || !confirmPassword) {
-      Swal.fire({
-        icon: "warning",
-        title: "Missing Fields",
-        text: "All fields are required!",
-      });
-      return;
+      return toast.error("All fields are required!");
     }
 
-    // ✅ Password length
     if (newPassword.length < 6) {
-      Swal.fire({
-        icon: "error",
-        title: "Weak Password",
-        text: "Password must be at least 6 characters!",
-      });
-      return;
+      return toast.error("Password must be at least 6 characters!");
     }
 
-    // ✅ Match check
     if (newPassword !== confirmPassword) {
-      Swal.fire({
-        icon: "error",
-        title: "Password Mismatch",
-        text: "Passwords do not match!",
-      });
-      return;
+      return toast.error("Passwords do not match!");
     }
 
     try {
-      // 🔥 API Ready
       const res = await fetch("/api/reset-password", {
         method: "POST",
         headers: {
@@ -58,33 +39,15 @@ const ResetPassword = () => {
       const data = await res.json();
 
       if (res.ok) {
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: data.message || "Password Updated 🎉",
-          showConfirmButton: false,
-          timer: 2000,
-          timerProgressBar: true,
-        });
-
+        toast.success(data.message || "Password Updated!");
         setTimeout(() => {
           navigate("/login");
-        }, 2000);
-
+        }, 1500);
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: data.message || "Failed to reset password!",
-        });
+        toast.error(data.message || "Failed to reset password!");
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Server Error",
-        text: "Unable to update password!",
-      });
+      toast.error("Unable to update password!");
     }
   };
 

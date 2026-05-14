@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.svg";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../redux/slices/authSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,72 +27,36 @@ const Signup = () => {
 
   const handleSignup = async () => {
     if (!mobile || !password || !confirmPassword) {
-      Swal.fire({
-        icon: "warning",
-        title: "Missing Fields",
-        text: "All fields are required!",
-      });
-      return;
+      return toast.error("All fields are required!");
     }
 
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Mobile",
-        text: "Enter valid 10-digit mobile number!",
-      });
-      return;
+      return toast.error("Enter valid 10-digit mobile number!");
     }
 
     if (password !== confirmPassword) {
-      Swal.fire({
-        icon: "error",
-        title: "Password Mismatch",
-        text: "Passwords do not match!",
-      });
-      return;
+      return toast.error("Passwords do not match!");
     }
 
     if (!terms) {
-      Swal.fire({
-        icon: "warning",
-        title: "Accept Terms",
-        text: "Please accept Terms & Conditions",
-      });
-      return;
+      return toast.error("Please accept Terms & Conditions");
     }
 
     try {
       const result = await dispatch(
-        registerUser({ mobile, password, role }) // ✅ role added
+        registerUser({ mobile, password, role })
       );
 
       if (registerUser.fulfilled.match(result)) {
-        Swal.fire({
-          toast: true,
-          position: "top",
-          icon: "success",
-          title: "Registration Successful!",
-          showConfirmButton: false,
-          timer: 2000,
-        });
-
+        toast.success("Registration Successful!");
         setTimeout(() => {
           Navigate("/login");
-        }, 2000);
+        }, 1500);
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Signup Failed",
-          text: result.payload,
-        });
+        toast.error(result.payload || "Signup failed");
       }
     } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Server Error",
-        text: "Try again later!",
-      });
+      toast.error("Server error. Try again later!");
     }
   };
 

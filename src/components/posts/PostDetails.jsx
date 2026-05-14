@@ -10,7 +10,7 @@ import {
   faStar,
   faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import successEmoji from "../../assets/img/review-one.png";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
@@ -33,13 +33,14 @@ const PostDetails = () => {
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
-    if (id) {
+    if (id && String(selectedJob?.id) !== String(id)) {
+      setJob(null);
       dispatch(getJobById(id));
     }
-  }, [dispatch, id]);
+  }, [dispatch, id, selectedJob?.id]);
 
   useEffect(() => {
-    if (selectedJob) {
+    if (selectedJob && String(selectedJob.id) === String(id)) {
       const answers = {};
       if (selectedJob.answers && Array.isArray(selectedJob.answers)) {
         selectedJob.answers.forEach((a) => {
@@ -58,7 +59,7 @@ const PostDetails = () => {
         icon: getJobIcon(selectedJob.role_id),
       });
     }
-  }, [selectedJob]);
+  }, [selectedJob, id]);
 
   const handleApply = async () => {
     if (job?.hasApplied) return;
@@ -67,18 +68,14 @@ const PostDetails = () => {
     try {
       const result = await dispatch(applyToJob({ jobId: id, applicationData: {} })).unwrap();
       if (result.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Applied successfully!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        const role = result.data?.role || job?.role || "this job";
+        toast.success(`Successfully applied for ${role}!`);
         setJob((prev) => ({ ...prev, hasApplied: true }));
       } else {
-        Swal.fire("Error", "Something went wrong", "error");
+        toast.error("Something went wrong");
       }
     } catch (error) {
-      Swal.fire("Error", error || "Failed to apply", "error");
+      toast.error(error || "Failed to apply");
     } finally {
       setApplying(false);
     }
@@ -97,7 +94,7 @@ const PostDetails = () => {
       setShowSuccessModal(true);
       setJob((prev) => ({ ...prev, status: "closed" }));
     } catch (error) {
-      Swal.fire("Error", "Failed to close post", "error");
+      toast.error("Failed to close post");
     } finally {
       setClosing(false);
     }
@@ -191,6 +188,13 @@ const PostDetails = () => {
               ) : (
                 "Apply for this job"
               )}
+            </button>
+          ) : !user ? (
+            <button
+              className="post-action-btn apply-btn"
+              onClick={() => navigate("/login")}
+            >
+              Login to Apply
             </button>
           ) : null}
         </div>

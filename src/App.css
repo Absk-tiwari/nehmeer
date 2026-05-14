@@ -1893,6 +1893,39 @@ textarea {
   gap: 15px;
 }
 
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.load-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 32px;
+  background: #7f9346;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-btn:hover {
+  background: #6b7d3a;
+  transform: translateY(-1px);
+}
+
+.load-more-btn:disabled {
+  background: #b5c78a;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .postCard {
   display: flex;
   gap: 15px;
@@ -3227,7 +3260,7 @@ textarea {
 /* Percent - styles.percent */
 .profile-percent {
   position: absolute;
-  right: -20px;
+  right: -45px;
   top: -8px;
   font-size: 15px;
 }
@@ -3393,7 +3426,7 @@ textarea {
 /* FORM CONTAINER */
 .complete-profile-container {
   width: 100%;
-  max-width: 420px;
+  /* max-width: 420px; */
   background: transparent;
 }
 
@@ -3625,211 +3658,511 @@ background:#f5f5f5;
 }
 
 /* subscription */
-.subscription-page{
-max-width:1100px;
-margin:auto;
-padding:20px;
-background:#f6f6f6;
-min-height:100vh;
+.subscription-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: 100vh;
 }
 
-/* HEADER */
-
-.subscription-header{
-display:flex;
-align-items:center;
-gap:15px;
-margin-bottom:20px;
+/* CURRENT PLAN BANNER */
+.current-plan-banner {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+  padding: 16px 20px;
+  color: white;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-.subscription-back-btn{
-background:none;
-border:none;
-font-size:20px;
-cursor:pointer;
+.current-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
 }
 
-/* MY PLAN */
-
-.my-plan-section h3{
-margin-bottom:10px;
+.current-plan-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.my-plan-card{
-background:#fff;
-border-radius:14px;
-padding:18px;
-display:flex;
-gap:15px;
-border:2px solid #d6d6a8;
+.current-plan-left h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
 }
 
-.plan-icon{
-font-size:28px;
+.current-plan-price {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
 }
 
-.plan-info h4{
-margin-bottom:6px;
+.current-plan-price span {
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.8;
 }
 
-.plan-info p{
-font-size:14px;
-color:#444;
+.manage-plan-btn {
+  background: white;
+  color: #059669;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.manage-plan-btn{
-margin-top:10px;
-background:black;
-color:white;
-border:none;
-padding:6px 12px;
-border-radius:20px;
-cursor:pointer;
+.manage-plan-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* ALL PLANS */
-
-.all-plans-section{
-margin-top:30px;
+/* PLANS SECTION */
+.plans-section {
+  margin-bottom: 32px;
 }
 
-.plans-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:20px;
-margin-top:15px;
+.plans-header {
+  text-align: center;
+  margin-bottom: 24px;
 }
 
-/* PLAN CARDS */
-
-.plan-card{
-border-radius:18px;
-padding:20px;
-color:white;
-position:relative;
+.plans-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
 }
 
-/* PLAN COLORS */
-
-.plan-0{
-background:linear-gradient(135deg,#3d7bd9,#6fa1e3);
+.plans-header p {
+  color: #64748b;
+  margin: 0;
+  font-size: 14px;
 }
 
-.plan-1{
-background:linear-gradient(135deg,#f7a84c,#f88d3d);
+.plans-loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
 }
 
-.plan-2{
-background:linear-gradient(135deg,#8a5cf6,#d44bd1);
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
 }
 
-/* BADGE */
-
-.active-badge{
-position:absolute;
-top:10px;
-right:10px;
-background:#4cd1b7;
-color:white;
-padding:3px 8px;
-font-size:12px;
-border-radius:10px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* FEATURES */
-
-.plan-features{
-margin:10px 0;
+/* PLANS GRID */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-.plan-features p{
-font-size:13px;
+/* PLAN CARD */
+.plan-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px 20px;
+  position: relative;
+  border: 2px solid transparent;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-/* BUTTON */
-
-.plan-btn{
-border:none;
-padding:8px 16px;
-border-radius:20px;
-background:white;
-color:#333;
-cursor:pointer;
+.plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
-.plan-btn.black{
-background:black;
-color:white;
+.plan-card.popular {
+  border-color: #f59e0b;
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.2);
 }
 
-/* WHY UPGRADE */
-
-.why-upgrade{
-margin-top:25px;
+.plan-card.popular:hover {
+  transform: scale(1.02) translateY(-4px);
 }
 
-.why-upgrade ul{
-margin-top:10px;
-padding-left:20px;
+.plan-card.active {
+  border-color: #10b981;
 }
 
-/* HELP BOX */
-
-.help-box{
-margin-top:20px;
-background:#ffa726;
-padding:15px;
-border-radius:10px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-color:white;
+/* BADGES */
+.popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
-.help-box button{
-background:white;
-color:#333;
-border:none;
-padding:6px 12px;
-border-radius:15px;
-cursor:pointer;
+.active-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
 }
 
-/* FOOTER */
-
-.subscription-footer{
-text-align:center;
-font-size:12px;
-margin-top:15px;
-color:#666;
+/* PLAN ICON */
+.plan-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 16px;
 }
 
-
-/* MOBILE SLIDER */
-
-@media (max-width:768px){
-
-.plans-grid{
-display:flex;
-overflow-x:auto;
-gap:16px;
-padding-bottom:10px;
-scroll-snap-type:x mandatory;
+.plan-0 .plan-icon {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
 }
 
-.plan-card{
-min-width:240px;
-flex-shrink:0;
-scroll-snap-align:start;
+.plan-1 .plan-icon {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
 }
 
-.plans-grid::-webkit-scrollbar{
-display:none;
+.plan-2 .plan-icon {
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+  color: #7c3aed;
 }
 
+/* PLAN NAME */
+.plan-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 12px 0;
 }
-.plans-grid{
-scroll-padding-left:20px;
+
+/* PLAN PRICE */
+.plan-price {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+
+.plan-price .currency {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.plan-price .amount {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.plan-price .period {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* PLAN FEATURES */
+.plan-features {
+  width: 100%;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  text-align: left;
+  font-size: 13px;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.feature-item:last-child {
+  border-bottom: none;
+}
+
+.feature-item .check-icon {
+  color: #10b981;
+  font-size: 12px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* PLAN BUTTON */
+.plan-btn {
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.plan-0 .plan-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.plan-1 .plan-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.plan-2 .plan-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.plan-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.plan-btn.current {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: default;
+}
+
+.plan-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* BENEFITS SECTION */
+.benefits-section {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.benefits-section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.benefit-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.benefit-text h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.benefit-text p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* HELP SECTION */
+.help-section {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.help-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.help-icon {
+  font-size: 24px;
+  color: #d97706;
+}
+
+.help-text h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0 0 4px 0;
+}
+
+.help-text p {
+  font-size: 13px;
+  color: #a16207;
+  margin: 0;
+}
+
+.help-btn {
+  background: #d97706;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.help-btn:hover {
+  background: #b45309;
+}
+
+/* TRUST SECTION */
+.trust-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trust-item svg {
+  color: #10b981;
+}
+
+.trust-divider {
+  width: 4px;
+  height: 4px;
+  background: #cbd5e1;
+  border-radius: 50%;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  .subscription-page {
+    padding: 16px;
+  }
+
+  .plans-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    padding: 16px 4px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .plan-card {
+    min-width: 280px;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+  }
+
+  .plan-card.popular {
+    transform: none;
+  }
+
+  .plans-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .help-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .help-content {
+    flex-direction: column;
+  }
+
+  .trust-section {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .trust-divider {
+    display: none;
+  }
 }
 
 /* legalpage */
@@ -7757,7 +8090,7 @@ cursor:pointer;
   font-size: 14px;
   color: #666;
   margin: 0;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -7769,7 +8102,7 @@ cursor:pointer;
   font-size: 16px;
   padding: 8px;
   cursor: pointer;
-  margin-left: 8px;
+  margin-right: -80px;
   transition: color 0.2s;
 }
 
@@ -8976,4 +9309,85 @@ cursor:pointer;
     left: 50%;
     transform: translateX(-50%);
   }
+}
+
+/* Confirm Modal */
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.confirm-modal-card {
+  width: 85%;
+  max-width: 340px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirm-modal-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  color: #fff;
+  font-size: 24px;
+}
+
+.confirm-modal-message {
+  font-size: 16px;
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.confirm-modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-modal-cancel {
+  background: #9E9E9E;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm-modal-cancel:hover {
+  background: #757575;
+}
+
+.confirm-modal-confirm {
+  background: #4A90E2;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm-modal-confirm:hover {
+  background: #357ABD;
 }

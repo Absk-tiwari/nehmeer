@@ -53,7 +53,12 @@ const SavedLocation = () => {
         addLocation({
           lat,
           lng,
-          address,
+          address: {
+            ...address,
+            formattedAddress: address.fullAddress,
+            region: address.state_district,
+            postalCode: address.postcode,
+          }
         })
       ).then(() => {
         setAdding(false);
@@ -91,10 +96,22 @@ const SavedLocation = () => {
     if (onSelect) {
       onSelect(selectedLocation);
     }
+
+    // Build selectedAddress in the format CompleteProfile expects
+    const selectedAddress = {
+      lat: selectedLocation.latitude,
+      lng: selectedLocation.longitude,
+      address: {
+        fullAddress: selectedLocation.address,
+        city: selectedLocation.city || selectedLocation.area || "",
+        state: selectedLocation.state || "",
+      },
+    };
+
     if (goTo) {
-      navigate(goTo);
+      navigate(goTo, { state: { selectedAddress } });
     } else {
-      navigate(-1);
+      navigate(-1, { state: { selectedAddress } });
     }
   };
 

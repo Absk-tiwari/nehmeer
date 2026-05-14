@@ -13,7 +13,7 @@ import {
   faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { getSearchWorkers } from "../../redux/slices/workerSlice";
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
 import noResultsImg from "../../assets/img/search-not-found.png";
 import AppLayout from "../layouts/AppLayout";
 
@@ -34,7 +34,7 @@ const SearchResults = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const initialFetchDone = useRef(false);
-
+  const {user} = useSelector(s => s.auth);
   const { recommendedWorkers, recommendedLoading } = useSelector(
     (state) => state.workers
   );
@@ -83,7 +83,7 @@ const SearchResults = () => {
           item.answers?.forEach((a) => {
             answers[a.question] = a.answer;
           });
-
+          const photo = item.profile_photo ?? null;
           const profile = item.workerProfile || {};
 
           return {
@@ -91,13 +91,13 @@ const SearchResults = () => {
             _id: item.id?.toString(),
             name: profile.name || item.name || "Worker",
             title: profile.title || item.role?.name || "Job-Seeker",
-            role: profile.role || item.role?.name || "Worker",
+            role: profile.title || item.job_title || "Worker",
             location: profile.city || answers["Location"] || item.location || "-",
             experience: profile.experience || answers["Experience Level"] || "-",
             age: profile.age || item.age || "-",
             rating: profile.rating || item.rating || 0,
             reviews: profile.reviews || item.reviews || 0,
-            image: profile.profile_photo || item.profile_photo,
+            image: photo,
             verified: profile.verified || item.verified || false,
             status: item.status,
             createdAt: item.created_at,
@@ -105,9 +105,9 @@ const SearchResults = () => {
         });
 
         if (pageNum === 1) {
-          setList(mapped);
+          setList(mapped.filter(item => parseInt(item.id) !== user?.id));
         } else {
-          setList((prev) => [...prev, ...mapped]);
+          setList((prev) => [...prev, ...mapped.filter( o => parseInt(o.id) !== user?.id)]);
         }
         setTotal(result.total || 0);
       }
@@ -223,7 +223,7 @@ const SearchResults = () => {
       age: profile.age || item.age || "-",
       rating: profile.rating || item.rating || 0,
       reviews: profile.reviews || item.reviews || 0,
-      image: profile.profile_photo || item.profile_photo,
+      image: item.profile_photo ?? null,
       verified: profile.verified || item.verified || false,
       createdAt: item.created_at,
     };
@@ -308,6 +308,7 @@ const SearchResults = () => {
                   <div className="worker-image">
                     <img
                       src={worker.image || placeholderImage}
+                      data-src={worker.image || placeholderImage}
                       alt={worker.name}
                       onError={(e) => {
                         e.target.onerror = null;

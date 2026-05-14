@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import logo from "../../assets/img/logo.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../redux/slices/authSlice";
@@ -21,25 +21,21 @@ const Login = () => {
   // ✅ Autofill remembered mobile
   useEffect(() => {
     const savedMobile = localStorage.getItem("userMobile");
-    const savedRole = localStorage.getItem("userRole");
 
     if (savedMobile) {
       setMobile(savedMobile);
       setRemember(true);
     }
 
-    if (savedRole) {
-      setRole(savedRole); // ✅ restore role
-    }
   }, []);
 
   const handleLogin = async () => {
     if (!mobile || !password) {
-      return Swal.fire("Missing Fields", "All fields required!", "warning");
+      return toast.error("All fields are required!");
     }
 
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      return Swal.fire("Invalid Mobile", "Enter valid number", "error");
+      return toast.error("Enter a valid mobile number");
     }
 
     try {
@@ -56,30 +52,15 @@ const Login = () => {
           localStorage.removeItem("userMobile");
         }
 
-        // ✅ Save role for future
-        localStorage.setItem("userRole", role);
+        toast.success("Login Successful!");
 
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: `Login Successful!`,
-          showConfirmButton: false,
-          timer: 2000,
-        });
-
-        // ✅ ROLE BASED REDIRECT (INDUSTRY LEVEL)
-        if (role === "worker") {
-          navigate("/worker-dashboard"); // 👉 create later if not exist
-        } else {
-          navigate("/dashboard");
-        }
+        navigate("/dashboard");
 
       } else {
-        Swal.fire("Login Failed", result.payload, "error");
+        toast.error(result.payload || "Login failed");
       }
     } catch (error) {
-      Swal.fire("Error", "Something went wrong", "error");
+      toast.error("Something went wrong");
     }
   };
 

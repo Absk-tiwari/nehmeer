@@ -1,24 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { calculateProfileCompletion, getProgressColor } from "../../utils/profileUtils";
 
 const ProfileProgress = ({ onCompleteClick }) => {
   const navigate = useNavigate();
 
-  // ✅ Get profile from redux
-  const { profile } = useSelector((state) => state.profile || {});
+  const { user, workerProfile, availability } = useSelector((state) => state.auth);
 
-  // ✅ Calculate completion %
-  const calculateProgress = () => {
-    if (!profile) return 0;
-
-    const fields = ["name", "whatsapp", "gender", "lookingFor", "location"];
-    const filled = fields.filter((field) => profile[field]).length;
-
-    return Math.round((filled / fields.length) * 100);
-  };
-
-  const percentage = calculateProgress();
+  const percentage = calculateProfileCompletion({ user, workerProfile, availability });
+  const progressColor = getProgressColor(percentage);
 
   return (
     <div className="profile-progress-card">
@@ -40,7 +31,7 @@ const ProfileProgress = ({ onCompleteClick }) => {
           className="progress-circle"
           style={{
             background: `conic-gradient(
-              #f4b400 ${percentage * 3.6}deg,
+              ${progressColor} ${percentage * 3.6}deg,
               #eee ${percentage * 3.6}deg
             )`,
           }}

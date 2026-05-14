@@ -4,7 +4,7 @@ export const SemiProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    return <LoginPrompt />;
+    // return <LoginPrompt />;
   }
 
   return children;

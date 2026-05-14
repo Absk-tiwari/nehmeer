@@ -1,4 +1,4 @@
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faCheck, faStar } from "@fortawesome/free-solid-svg-icons";
 

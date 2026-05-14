@@ -9,15 +9,17 @@ import {
   faPlus,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import {
   saveEmployerProfile,
   saveWorkerProfile,
   uploadAvatar,
 } from "../redux/slices/profileSlice";
-import { setUser } from "../redux/slices/authSlice";
+import { setUser, setWorkerProfile, setAvailability } from "../redux/slices/authSlice";
 import AppLayout from "./layouts/AppLayout";
 import CommonHeader from "./layouts/CommonHeader";
+import placeholderImage from "../assets/img/avatar.jpg";
+import Select from "react-select";
 
 const JOB_ROLES = {
   1: "Cook",
@@ -30,25 +32,88 @@ const JOB_ROLES = {
   13: "All-Rounder",
 };
 
+const GENDER_OPTIONS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+];
+
+const JOB_ROLE_OPTIONS = Object.entries(JOB_ROLES).map(([key, value]) => ({
+  value: key,
+  label: value,
+}));
+
+const MARITAL_STATUS_OPTIONS = [
+  { value: "single", label: "Single" },
+  { value: "married", label: "Married" },
+  { value: "divorced", label: "Divorced" },
+  { value: "widowed", label: "Widowed" },
+];
+
+const AVAILABILITY_TYPE_OPTIONS = [
+  { value: "part-time", label: "Part Time" },
+  { value: "full-time", label: "Full Time" },
+];
+
+const selectStyles = {
+  control: (base, state) => ({
+    ...base,
+    minHeight: "48px",
+    borderRadius: "12px",
+    border: state.isFocused ? "2px solid #7f9346" : "1px solid #e0e0e0",
+    boxShadow: "none",
+    backgroundColor: "#fff",
+    "&:hover": {
+      borderColor: "#7f9346",
+    },
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected ? "#7f9346" : state.isFocused ? "#f0f4e8" : "#fff",
+    color: state.isSelected ? "#fff" : "#333",
+    padding: "12px 16px",
+    cursor: "pointer",
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "#999",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "#333",
+  }),
+  menu: (base) => ({
+    ...base,
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+};
+
 const CompleteProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
-  const { user, role } = useSelector((state) => state.auth);
+  const { user, workerProfile: wp, availability: stateAvailability } = useSelector((state) => state.auth);
   const { loading } = useSelector((state) => state.profile);
 
-  const workerProfile = user?.workerProfile || {};
-  const isWorker = role === "worker";
+  const workerProfile = wp || user?.workerProfile || {};
+  const isWorker = user?.role === "worker";
 
   const [avatar, setAvatar] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(user?.profile_photo || null);
+  const [avatarPreview, setAvatarPreview] = useState(
+    user?.profile_photo ?? null
+  );
   const [uploading, setUploading] = useState(false);
 
   const [fields, setFields] = useState({
     name: user?.name || "",
-    whatsapp: user?.whatsapp || "",
+    whatsapp: user?.whatsapp || user?.mobile || "",
     email: user?.email || "",
     gender: user?.gender || "",
     lookingFor: user?.lookingFor || "",
@@ -77,10 +142,11 @@ const CompleteProfile = () => {
     service_radius_km: workerProfile.service_radius_km?.toString() || "",
   });
 
-  const [availability, setAvailability] = useState(
-    user?.availability || [{ type: "", start_time: "", end_time: "" }]
+  const [availability, setAvailabilityState] = useState(
+    stateAvailability?.length > 0 ? stateAvailability : []
   );
 
+  // Prefill whatsapp from signup mobile if not set
   useEffect(() => {
     const mobile = localStorage.getItem("signupMobile");
     if (mobile && !fields.whatsapp) {
@@ -132,15 +198,17 @@ const CompleteProfile = () => {
     try {
       const result = await dispatch(uploadAvatar(formData));
       if (uploadAvatar.fulfilled.match(result)) {
-        Swal.fire({
-          icon: "success",
-          title: "Profile picture updated!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        // Backend returns avatar URL in result.payload.data (relative path)
+        const avatarPath = result.payload?.data;
+        if (avatarPath && user) {
+          dispatch(setUser({ ...user, profile_photo: avatarPath }));
+          setAvatarPreview(avatarPath);
+        }
+        toast.success("Profile picture updated!");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Failed to upload picture");
     } finally {
       setUploading(false);
     }
@@ -156,17 +224,17 @@ const CompleteProfile = () => {
   };
 
   const addAvailabilitySlot = () => {
-    setAvailability([...availability, { type: "", start_time: "", end_time: "" }]);
+    setAvailabilityState([...availability, { type: "", start_time: "", end_time: "" }]);
   };
 
   const removeAvailabilitySlot = (index) => {
-    setAvailability(availability.filter((_, i) => i !== index));
+    setAvailabilityState(availability.filter((_, i) => i !== index));
   };
 
   const updateAvailabilitySlot = (index, field, value) => {
     const updated = [...availability];
     updated[index][field] = value;
-    setAvailability(updated);
+    setAvailabilityState(updated);
   };
 
   const validateForm = () => {
@@ -180,37 +248,56 @@ const CompleteProfile = () => {
   const handleSave = async () => {
     const error = validateForm();
     if (error) {
-      return Swal.fire("Validation Error", error, "warning");
+      return toast.error(error);
     }
 
-    const payload = {
+    const integerFields = [
+      "age", "experience", "part_time_salary", "full_time_salary",
+      "hourly_rate", "monthly_rate", "service_radius_km"
+    ];
+
+    const transformPayload = (data) => {
+      const transformed = { ...data };
+      integerFields.forEach((field) => {
+        if (transformed[field] === "" || transformed[field] === undefined) {
+          transformed[field] = null;
+        } else if (transformed[field] !== null) {
+          transformed[field] = Number(transformed[field]) || null;
+        }
+      });
+      return transformed;
+    };
+
+    const rawPayload = {
       ...fields,
       ...(isWorker ? { ...workerFields, availability } : {}),
     };
+
+    const payload = transformPayload(rawPayload);
 
     try {
       const saveAction = isWorker ? saveWorkerProfile : saveEmployerProfile;
       const result = await dispatch(saveAction(payload));
 
       if (saveAction.fulfilled.match(result)) {
-        const { user: updatedUser, workerProfile: wp, availability: av } = result.payload?.data || {};
+        const { user: updatedUser, workerProfile: updatedWp, availability: av } = result.payload?.data || {};
         if (updatedUser) {
-          dispatch(setUser({ ...updatedUser, workerProfile: wp, availability: av }));
+          dispatch(setUser(updatedUser));
+        }
+        if (updatedWp) {
+          dispatch(setWorkerProfile(updatedWp));
+        }
+        if (av) {
+          dispatch(setAvailability(av));
         }
 
-        Swal.fire({
-          icon: "success",
-          title: "Profile saved!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-
-        setTimeout(() => navigate(-1), 1500);
+        toast.success("Profile saved!");
+        setTimeout(() => navigate(-1), 1000);
       } else {
-        Swal.fire("Error", result.payload || "Something went wrong", "error");
+        toast.error(result.payload || "Something went wrong");
       }
     } catch (err) {
-      Swal.fire("Error", "Something went wrong", "error");
+      toast.error("Something went wrong");
     }
   };
 
@@ -220,13 +307,15 @@ const CompleteProfile = () => {
 
         <div className="avatar-section" onClick={handleAvatarClick}>
           <div className="avatar-wrapper">
-            {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" className="avatar-image" />
-            ) : (
-              <div className="avatar-placeholder">
-                <FontAwesomeIcon icon={faCamera} />
-              </div>
-            )}
+            <img
+              src={avatarPreview || placeholderImage}
+              alt="Avatar"
+              className="avatar-image"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = placeholderImage;
+              }}
+            />
             <div className="avatar-edit">
               <FontAwesomeIcon icon={uploading ? faSpinner : faCamera} spin={uploading} />
             </div>
@@ -241,6 +330,22 @@ const CompleteProfile = () => {
         </div>
 
         <div className="form-section">
+          {isWorker && (
+            <>
+              <label className="form-label">Job Title</label>
+              <Select
+                options={JOB_ROLE_OPTIONS.map((opt) => ({ value: opt.label, label: opt.label }))}
+                value={fields.title ? { value: fields.title, label: fields.title } : null}
+                onChange={(selected) =>
+                  setFields((prev) => ({ ...prev, title: selected?.value || "" }))
+                }
+                placeholder="Select Job Role"
+                styles={selectStyles}
+                isClearable
+                isSearchable
+              />
+            </>
+          )}
           <label className="form-label">Name</label>
           <input
             type="text"
@@ -276,38 +381,37 @@ const CompleteProfile = () => {
           />
 
           <label className="form-label">Gender</label>
-          <select
-            name="gender"
-            className="form-select"
-            value={fields.gender}
-            onChange={handleFieldChange}
-          >
-            <option value="">Select</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+          <Select
+            options={GENDER_OPTIONS}
+            value={GENDER_OPTIONS.find((opt) => opt.value === fields.gender) || null}
+            onChange={(selected) =>
+              setFields((prev) => ({ ...prev, gender: selected?.value || "" }))
+            }
+            placeholder="Select Gender"
+            styles={selectStyles}
+            isClearable
+          />
 
           {!isWorker && (
             <>
               <label className="form-label">I Am Looking For</label>
-              <select
-                name="lookingFor"
-                className="form-select"
-                value={fields.lookingFor}
-                onChange={handleFieldChange}
-              >
-                <option value="">Select</option>
-                {Object.entries(JOB_ROLES).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
-              </select>
+              <Select
+                options={JOB_ROLE_OPTIONS}
+                value={JOB_ROLE_OPTIONS.find((opt) => opt.value === fields.lookingFor) || null}
+                onChange={(selected) =>
+                  setFields((prev) => ({ ...prev, lookingFor: selected?.value || "" }))
+                }
+                placeholder="Select Role"
+                styles={selectStyles}
+                isClearable
+                isSearchable
+              />
             </>
           )}
 
           <label className="form-label">Select Your Location</label>
           <div className="form-location-btn" onClick={handleLocationSelect}>
-            <span className={fields.location ? "" : "placeholder"}>
+            <span>
               {fields.location || "Select"}
             </span>
             <FontAwesomeIcon icon={faChevronDown} />
@@ -358,17 +462,15 @@ const CompleteProfile = () => {
               />
 
               <label className="form-label">Marital Status</label>
-              <select
-                name="marital_status"
-                className="form-select"
-                value={fields.marital_status}
-                onChange={handleFieldChange}
-              >
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="divorced">Divorced</option>
-                <option value="widowed">Widowed</option>
-              </select>
+              <Select
+                options={MARITAL_STATUS_OPTIONS}
+                value={MARITAL_STATUS_OPTIONS.find((opt) => opt.value === fields.marital_status) || MARITAL_STATUS_OPTIONS[0]}
+                onChange={(selected) =>
+                  setFields((prev) => ({ ...prev, marital_status: selected?.value || "single" }))
+                }
+                placeholder="Select Status"
+                styles={selectStyles}
+              />
 
               <label className="form-label">Description</label>
               <textarea
@@ -384,7 +486,7 @@ const CompleteProfile = () => {
 
               <label className="form-label">Experience (years)</label>
               <input
-                type="number"
+                type="text"
                 name="experience"
                 className="form-input"
                 placeholder="Experience (years)"
@@ -392,18 +494,6 @@ const CompleteProfile = () => {
                 onChange={handleWorkerFieldChange}
               />
 
-              <label className="form-label">Job Title</label>
-              <select
-                name="title"
-                className="form-select"
-                value={fields.title}
-                onChange={handleFieldChange}
-              >
-                <option value="">Select Job Role</option>
-                {Object.entries(JOB_ROLES).map(([key, value]) => (
-                  <option key={key} value={value}>{value}</option>
-                ))}
-              </select>
 
               <label className="form-label">Part-time Salary</label>
               <input
@@ -512,15 +602,13 @@ const CompleteProfile = () => {
 
               {availability.map((slot, index) => (
                 <div key={index} className="availability-slot">
-                  <select
-                    className="form-select"
-                    value={slot.type}
-                    onChange={(e) => updateAvailabilitySlot(index, "type", e.target.value)}
-                  >
-                    <option value="">Select Type</option>
-                    <option value="part-time">Part Time</option>
-                    <option value="full-time">Full Time</option>
-                  </select>
+                  <Select
+                    options={AVAILABILITY_TYPE_OPTIONS}
+                    value={AVAILABILITY_TYPE_OPTIONS.find((opt) => opt.value === slot.type) || null}
+                    onChange={(selected) => updateAvailabilitySlot(index, "type", selected?.value || "")}
+                    placeholder="Select Type"
+                    styles={selectStyles}
+                  />
 
                   <input
                     type="text"

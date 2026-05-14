@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
 
@@ -21,7 +22,7 @@ const CustomSubmit = () => {
   };
 
   const handleSubmit = () => {
-    alert("Requirements Submitted Successfully");
+    toast.success("Requirements Submitted Successfully");
     navigate("/dashboard");
   };
 

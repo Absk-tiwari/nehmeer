@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHeart,
@@ -19,61 +20,35 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
+import { calculateProfileCompletion, getProgressColor } from "../../utils/profileUtils";
+import { changeLanguage } from "../../i18n";
 
 const LANGUAGES = [
-  "Arabic",
-  "Bengali",
-  "English",
-  "French",
-  "German",
-  "Hindi",
-  "Italian",
-  "Japanese",
-  "Javanese",
-  "Korean",
-  "Marathi",
-  "Portuguese",
-  "Russian",
-  "Spanish"
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी (Hindi)" },
 ];
-
-const calculateProfileCompletion = (user) => {
-  if (!user) return 0;
-  const fields = ["name", "email", "profile_photo", "phone", "gender", "lookingFor"];
-  let filled = 0;
-  fields.forEach((field) => {
-    if (user[field] !== null && user[field] !== "" && user[field] !== undefined) {
-      filled++;
-    }
-  });
-  return Math.round((filled / fields.length) * 100);
-};
-
-const giveMeColor = (progress) => {
-  if (progress < 40) return "#f46565";
-  if (progress < 80) return "#fcb353";
-  return "#8AA05A";
-};
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, loading } = useSelector((state) => state.auth);
+  const { t, i18n } = useTranslation();
+  const { user, workerProfile, availability, loading } = useSelector((state) => state.auth);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState("English");
 
-  const ProfileProgress = calculateProfileCompletion(user);
+  const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)?.label || "English";
+
+  const ProfileProgress = calculateProfileCompletion({ user, workerProfile, availability });
 
   const menu = [
-    { title: "Favourites", icon: faHeart, path: "/favourites" },
-    { title: "My Subscription", icon: faGem, path: "/subscription" },
-    { title: "Saved Location", icon: faLocationDot, path: "/saved-location" },
-    { title: "Language", icon: faLanguage, action: "modal", right: currentLanguage },
-    { title: "About Us", icon: faCircleInfo, path: "/about" },
-    { title: "Terms and Conditions", icon: faFileLines, path: "/terms" },
-    { title: "Help & Support", icon: faHeadset, path: "/support" },
-    { title: "Rate us", icon: faStar, path: "/rate" },
-    { title: "Settings", icon: faGear, path: "/settings" },
+    { title: t("profile.favourites"), icon: faHeart, path: "/favourites" },
+    { title: t("profile.my_subscription"), icon: faGem, path: "/subscription" },
+    { title: t("location.saved_location"), icon: faLocationDot, path: "/saved-location" },
+    { title: t("profile.language"), icon: faLanguage, action: "modal", right: currentLanguage },
+    { title: t("profile.about_us"), icon: faCircleInfo, path: "/about" },
+    { title: t("profile.terms_and_conditions"), icon: faFileLines, path: "/terms" },
+    { title: t("navigation.help_support"), icon: faHeadset, path: "/support" },
+    { title: t("profile.rate_us"), icon: faStar, path: "/rate" },
+    { title: t("profile.settings"), icon: faGear, path: "/settings" },
   ];
 
   const handleMenuClick = (item) => {
@@ -85,7 +60,7 @@ const Profile = () => {
   };
 
   const handleLanguageSelect = (lang) => {
-    setCurrentLanguage(lang);
+    changeLanguage(lang.code);
     setShowLanguageModal(false);
   };
 
@@ -101,7 +76,7 @@ const Profile = () => {
     <AppLayout
       header={
         <CommonHeader
-          title="My Profile"
+          title={t("profile.my_profile")}
           data={[
             { icon: "notifications-outline", path: "/notifications" }
           ]}
@@ -137,12 +112,12 @@ const Profile = () => {
                   className="profile-progress-fill"
                   style={{
                     width: `${ProfileProgress}%`,
-                    backgroundColor: giveMeColor(ProfileProgress)
+                    backgroundColor: getProgressColor(ProfileProgress)
                   }}
                 />
                 <span className="profile-percent">{ProfileProgress}%</span>
               </div>
-              <span className="profile-progress-text">Profile Setup In Progress</span>
+              <span className="profile-progress-text">{t("profile.profile_setup_in_progress")}</span>
             </>
           )}
 
@@ -151,7 +126,7 @@ const Profile = () => {
             onClick={() => navigate("/complete-profile")}
           >
             <span className="profile-complete-text">
-              {ProfileProgress < 100 ? "Complete" : "Edit"} profile
+              {ProfileProgress < 100 ? t("profile.complete") : t("profile.edit")} profile
             </span>
           </button>
         </div>
@@ -186,18 +161,18 @@ const Profile = () => {
         <div className="profile-sheet-overlay" onClick={() => setShowLanguageModal(false)}>
           <div className="profile-filter-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="profile-sheet-header">
-              <span className="profile-sheet-title">Language</span>
+              <span className="profile-sheet-title">{t("profile.language")}</span>
               <div onClick={() => setShowLanguageModal(false)}>
                 <FontAwesomeIcon icon={faXmark} />
               </div>
             </div>
             {LANGUAGES.map((lang) => (
               <div
-                key={lang}
-                className="profile-lang-row"
+                key={lang.code}
+                className={`profile-lang-row ${i18n.language === lang.code ? "active" : ""}`}
                 onClick={() => handleLanguageSelect(lang)}
               >
-                <span className="profile-lang-text">{lang}</span>
+                <span className="profile-lang-text">{lang.label}</span>
               </div>
             ))}
           </div>

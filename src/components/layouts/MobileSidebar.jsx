@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,13 +21,16 @@ import {
   faRightFromBracket,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import toast from "react-hot-toast";
 import { logout } from "../../redux/slices/authSlice";
-import placeholderImage from "../../assets/img/placeholder.png";
+import ConfirmModal from "../common/ConfirmModal";
+import placeholderImage from "../../assets/img/avatar.jpg";
 
 const MobileSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { user, role } = useSelector((state) => state.auth);
   const isLoggedIn = !!localStorage.getItem("token");
@@ -39,9 +42,15 @@ const MobileSidebar = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutModal(false);
     dispatch(logout());
     onClose();
+    toast.success("Logged out successfully!");
     navigate("/login");
   };
 
@@ -82,7 +91,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
           {isLoggedIn ? (
             <div className="sidebar-user" onClick={() => handleNavigate("/profile")}>
               <img
-                src={user?.profile_photo || placeholderImage}
+                src={user?.profile_photo ?? placeholderImage}
                 alt="profile"
                 className="sidebar-avatar"
                 onError={(e) => {
@@ -144,13 +153,22 @@ const MobileSidebar = ({ isOpen, onClose }) => {
 
         {isLoggedIn && (
           <div className="sidebar-footer">
-            <div className="sidebar-item logout" onClick={handleLogout}>
+            <div className="sidebar-item logout" onClick={handleLogoutClick}>
               <FontAwesomeIcon icon={faRightFromBracket} className="sidebar-icon" />
               <span>Logout</span>
             </div>
           </div>
         )}
       </aside>
+
+      <ConfirmModal
+        visible={showLogoutModal}
+        message="Are you sure you want to log out of your account?"
+        onCancel={() => setShowLogoutModal(false)}
+        onSuccess={handleLogoutConfirm}
+        icon="logout"
+        btnText="Log Out"
+      />
     </>
   );
 };

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyWorkers } from "../../redux/slices/workerSlice";
 import SkeletonLoader from "../common/SkeletonLoader";
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 

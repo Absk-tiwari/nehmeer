@@ -3,7 +3,7 @@ import createPostOptions from "../data/createPostOptions";
 import { useDispatch, useSelector } from "react-redux";
 import { createPost, resetCreatePost } from "../../redux/slices/postSlice";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import AppLayout from "../layouts/AppLayout";
 import CommonHeader from "../layouts/CommonHeader";
 
@@ -41,13 +41,8 @@ const CreatePost = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 🔥 Validation (industry level)
     if (!formData.lookingFor || !formData.location) {
-      return Swal.fire(
-        "Missing Fields",
-        "Please fill required fields",
-        "warning"
-      );
+      return toast.error("Please fill required fields");
     }
 
     const finalData = {
@@ -61,14 +56,8 @@ const CreatePost = () => {
   // ✅ SUCCESS HANDLING
   useEffect(() => {
     if (createSuccess) {
-      Swal.fire({
-        icon: "success",
-        title: "Post Created 🎉",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-
-      navigate("/posts"); // change if route different
+      toast.success("Post Created!");
+      navigate("/posts");
       dispatch(resetCreatePost());
     }
   }, [createSuccess, navigate, dispatch]);
@@ -76,7 +65,7 @@ const CreatePost = () => {
   // ❌ ERROR HANDLING
   useEffect(() => {
     if (createError) {
-      Swal.fire("Error", createError, "error");
+      toast.error(createError);
     }
   }, [createError]);
 

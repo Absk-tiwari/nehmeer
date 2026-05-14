@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import forgot from "../../assets/img/forgot.svg";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { resendOtp, verifyOtp } from "../../redux/slices/authSlice";
 import { getUserMobile, maskMobile } from "../../utils/mobileHelper";
@@ -81,32 +81,28 @@ const OtpVerify = () => {
     const enteredOtp = autoOtp || otp.join("");
 
     if (enteredOtp.length !== 6) {
-      return Swal.fire("Invalid OTP", "Enter 6-digit OTP", "warning");
+      return toast.error("Enter 6-digit OTP");
     }
 
     try {
       const result = await dispatch(verifyOtp({ otp: enteredOtp }));
 
       if (verifyOtp.fulfilled.match(result)) {
-        Swal.fire({
-          icon: "success",
-          title: "OTP Verified ✅",
-          timer: 1500,
-          showConfirmButton: false,
-        }).then(() => {
-          const isForgot = localStorage.getItem("resetMobile");
+        toast.success("OTP Verified!");
+        const isForgot = localStorage.getItem("resetMobile");
 
+        setTimeout(() => {
           if (isForgot) {
             navigate("/reset-password");
           } else {
             navigate("/complete-profile");
           }
-        });
+        }, 1000);
       } else {
-        Swal.fire("Invalid OTP", result.payload, "error");
+        toast.error(result.payload || "Invalid OTP");
       }
     } catch {
-      Swal.fire("Error", "Unable to verify OTP!", "error");
+      toast.error("Unable to verify OTP!");
     }
   };
 
@@ -118,21 +114,13 @@ const OtpVerify = () => {
       const result = await dispatch(resendOtp());
 
       if (resendOtp.fulfilled.match(result)) {
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: "OTP Resent 📱",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-
-        setTimer(30); // reset timer
+        toast.success("OTP Resent!");
+        setTimer(30);
       } else {
-        Swal.fire("Error", result.payload, "error");
+        toast.error(result.payload || "Failed to resend OTP");
       }
     } catch {
-      Swal.fire("Error", "Failed to resend OTP!", "error");
+      toast.error("Failed to resend OTP!");
     }
   };
 

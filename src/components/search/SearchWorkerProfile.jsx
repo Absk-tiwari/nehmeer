@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,12 +9,12 @@ import {
   faCheck,
   faStar,
   faLocationDot,
-  faPerson,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { Spinner } from "reactstrap";
 import { getWorkerInfo } from "../../redux/slices/workerSlice";
 import { addFavourite, removeFavourite } from "../../redux/slices/favouriteSlice";
-import placeholderImage from "../../assets/img/placeholder.png";
+import placeholderImage from "../../assets/img/avatar.jpg";
 import AppLayout from "../layouts/AppLayout";
 
 const SearchWorkerProfile = () => {
@@ -22,26 +22,42 @@ const SearchWorkerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const fetchedRef = useRef(null);
 
   const workerFromState = location.state?.worker;
   const [worker, setWorker] = useState(workerFromState || null);
   const [activeTab, setActiveTab] = useState("about");
   const [isFavourite, setIsFavourite] = useState(false);
 
-  const { selectedWorker, loading } = useSelector((state) => state.workers);
+  const { selectedWorker, workerCache, loading } = useSelector((state) => state.workers);
   const { list: favourites } = useSelector((state) => state.favourites);
+  const { user } = useSelector((state) => state.auth);
+
+  const cachedWorker = useMemo(() => workerCache[id], [workerCache, id]);
 
   useEffect(() => {
-    if (id) {
+    if (!id) return;
+
+    if (cachedWorker) {
+      setWorker(cachedWorker);
+      return;
+    }
+
+    if (workerFromState) {
+      return;
+    }
+
+    if (fetchedRef.current !== id) {
+      fetchedRef.current = id;
       dispatch(getWorkerInfo(id));
     }
-  }, [dispatch, id]);
+  }, [dispatch, id, cachedWorker, workerFromState]);
 
   useEffect(() => {
-    if (selectedWorker) {
+    if (selectedWorker && String(selectedWorker.id) === String(id)) {
       setWorker((prev) => ({ ...prev, ...selectedWorker }));
     }
-  }, [selectedWorker]);
+  }, [selectedWorker, id]);
 
   useEffect(() => {
     if (worker && favourites) {
@@ -51,6 +67,10 @@ const SearchWorkerProfile = () => {
   }, [worker, favourites]);
 
   const handleFavourite = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (isFavourite) {
       dispatch(removeFavourite(worker.id || worker._id));
     } else {
@@ -170,7 +190,7 @@ const SearchWorkerProfile = () => {
               />
             ) : (
               <div className="profile-placeholder">
-                <FontAwesomeIcon icon={faPerson} />
+                <FontAwesomeIcon icon={faUser} />
               </div>
             )}
             {profile.latitude && (
@@ -190,8 +210,8 @@ const SearchWorkerProfile = () => {
               )}
             </div>
 
-            <p className="experience">Experience {profile.experience || worker.experience || "N/A"}</p>
-            <p className="role">{profile.title || worker.title || worker.role || "Job-Seeker"}</p>
+            <p className="experience">Experience {profile.experience || worker.experience || "N/A"} yrs</p>
+            <p className="role">{profile.title || worker.job_title || worker.role || "Job-Seeker"}</p>
 
             <div className="rating-row">
               <span className="rating-badge">
@@ -237,7 +257,7 @@ const SearchWorkerProfile = () => {
               </div>
               <div className="info-row">
                 <span className="label">Role:</span>
-                <span className="value">{profile.title || worker.title || worker.role || "N/A"}</span>
+                <span className="value">{profile.title || worker.job_title || worker.role || "N/A"}</span>
               </div>
               {worker.email && (
                 <div className="info-row">
@@ -263,7 +283,7 @@ const SearchWorkerProfile = () => {
                   </div>
                   <div className="info-row">
                     <span className="label">Experience:</span>
-                    <span className="value">{profile.experience || "0 yrs"}</span>
+                    <span className="value">{profile.experience || "0 yrs"} yrs</span>
                   </div>
                   <div className="info-row">
                     <span className="label">Marital Status:</span>
@@ -310,9 +330,15 @@ const SearchWorkerProfile = () => {
 
         {/* Hire Button */}
         <div className="hire-button-wrapper">
-          <button className="hire-btn" onClick={handleHireRequest}>
-            Send Hire Request
-          </button>
+          {user ? (
+            <button className="hire-btn" onClick={handleHireRequest}>
+              Send Hire Request
+            </button>
+          ) : (
+            <button className="hire-btn" onClick={() => navigate("/login")}>
+              Login to Hire
+            </button>
+          )}
         </div>
       </div>
     </AppLayout>
